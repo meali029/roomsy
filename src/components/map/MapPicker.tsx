@@ -26,7 +26,7 @@ export default function MapPicker({ onLocationChange, defaultLocation }: MapPick
         onLocationChange(place.name)
       }
     })
-  }, [])
+  }, [onLocationChange])
 
   return (
     <input

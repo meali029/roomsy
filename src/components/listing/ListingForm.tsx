@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import MapPicker from "@/components/map/MapPicker"
 
 interface ListingFormData {
@@ -38,6 +39,10 @@ export default function ListingForm({ defaultValues }: ListingFormProps) {
   )
 
   const [uploading, setUploading] = useState(false)
+
+  const handleLocationChange = useCallback((address: string) => {
+    setFormData(prev => ({ ...prev, location: address }))
+  }, [])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -118,11 +123,18 @@ export default function ListingForm({ defaultValues }: ListingFormProps) {
       {/* Preview */}
       <div className="grid grid-cols-3 gap-2">
         {formData.imageUrls.map((url, i) => (
-          <img key={i} src={url} alt={`preview-${i}`} className="w-full h-24 object-cover rounded" />
+          <div key={i} className="relative w-full h-24">
+            <Image 
+              src={url} 
+              alt={`preview-${i}`} 
+              fill
+              className="object-cover rounded" 
+            />
+          </div>
         ))}
       </div>
 <MapPicker
-  onLocationChange={(address) => setFormData({ ...formData, location: address })}
+  onLocationChange={handleLocationChange}
   defaultLocation={formData.location}
 />
 

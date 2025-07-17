@@ -33,7 +33,8 @@ export default function RegisterForm() {
         const { message } = await res.json()
         setError(message || "Something went wrong")
       }
-    } catch (err) {
+    } catch (error) {
+      console.error("Registration error:", error)
       setError("Network error")
     }
   }

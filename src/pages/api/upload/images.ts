@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { getServerSession } from "next-auth"
+import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/libs/auth"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
