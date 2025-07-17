@@ -1,13 +1,12 @@
 // src/lib/auth.ts
 
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/libs/prisma"
 
-export const authOptions: AuthOptions = {
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
 
   providers: [
@@ -42,11 +41,12 @@ export const authOptions: AuthOptions = {
   ],
 
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
   },
 
   callbacks: {
-    async session({ token, session }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ token, session }: { token: any; session: any }) {
       if (token && session.user) {
         (session.user as { id?: string; role?: string; email?: string }).id = token.id as string;
         (session.user as { id?: string; role?: string; email?: string }).role = token.role as string;
@@ -54,7 +54,8 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
-    async jwt({ token, user }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
         token.id = user.id
         token.role = (user as { id: string; role?: string }).role
