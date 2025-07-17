@@ -4,30 +4,30 @@ import { authOptions } from "@/libs/auth"
 import { prisma } from "@/libs/prisma"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "POST") {
-    const session = await getServerSession(req, res, authOptions)
-    
-    if (!session?.user) {
-      return res.status(401).json({ message: "Unauthorized" })
-    }
+  try {
+    if (req.method === "POST") {
+      const session = await getServerSession(req, res, authOptions)
+      
+      if (!session?.user) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
 
-    const {
-      title,
-      description,
-      rent,
-      city,
-      location,
-      genderPreference,
-      availableFrom,
-      availableMonths,
-      imageUrls = [], // 👈 Accept imageUrls
-    } = req.body
+      const {
+        title,
+        description,
+        rent,
+        city,
+        location,
+        genderPreference,
+        availableFrom,
+        availableMonths,
+        imageUrls = [], // 👈 Accept imageUrls
+      } = req.body
 
-    if (!title || !description || !rent || !city || !availableFrom) {
-      return res.status(400).json({ message: "Missing required fields" })
-    }
+      if (!title || !description || !rent || !city || !availableFrom) {
+        return res.status(400).json({ message: "Missing required fields" })
+      }
 
-    try {
       const listing = await prisma.listing.create({
         data: {
           title,
@@ -44,16 +44,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
 
       return res.status(201).json({ message: "Listing created", listing })
-    } catch (error) {
-      console.error("❌ POST error:", error)
-      return res.status(500).json({ message: "Failed to create listing" })
     }
-  }
 
-  if (req.method === "GET") {
-    try {
+    if (req.method === "GET") {
+      // Add better error handling for database connection
+      if (!prisma) {
+        return res.status(500).json({ 
+          message: "Database connection error",
+          error: "Prisma client not available"
+        })
+      }
+
       const listings = await prisma.listing.findMany({
-        // Remove or update the 'where' clause if 'isArchived' does not exist
         orderBy: { createdAt: "desc" },
         include: {
           user: {
@@ -69,11 +71,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
 
       return res.status(200).json({ listings })
-    } catch (error) {
-      console.error("❌ GET error:", error)
-      return res.status(500).json({ message: "Failed to fetch listings" })
     }
-  }
 
-  return res.status(405).json({ message: "Method not allowed" })
+    return res.status(405).json({ message: "Method not allowed" })
+  } catch (error) {
+    console.error("❌ API error:", error)
+    
+    // Return more detailed error information
+    return res.status(500).json({ 
+      message: "Internal server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+      timestamp: new Date().toISOString(),
+      // Only include stack trace in development
+      ...(process.env.NODE_ENV === "development" && { 
+        stack: error instanceof Error ? error.stack : undefined 
+      })
+    })
+  }
 }
