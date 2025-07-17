@@ -1,13 +1,14 @@
 // src/lib/auth.ts
 
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
+// import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/libs/prisma"
 
 export const authOptions = {
-  adapter: PrismaAdapter(prisma),
+  // Temporarily remove adapter to isolate database issues
+  // adapter: PrismaAdapter(prisma),
   
   providers: [
     // 🔐 Email + Password
@@ -54,30 +55,31 @@ export const authOptions = {
 
   callbacks: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ token, session }: { token: any; session: any }) {
-      try {
-        if (token && session.user) {
-          (session.user as { id?: string; role?: string; email?: string }).id = token.id as string;
-          (session.user as { id?: string; role?: string; email?: string }).role = token.role as string;
-          (session.user as { id?: string; role?: string; email?: string }).email = token.email as string;
-        }
-        return session;
-      } catch (error) {
-        console.error("Session callback error:", error)
-        return session;
-      }
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async jwt({ token, user }: { token: any; user?: any }) {
       try {
         if (user) {
           token.id = user.id
-          token.role = (user as { id: string; role?: string }).role
+          token.email = user.email
+          token.name = user.name
         }
         return token
       } catch (error) {
         console.error("JWT callback error:", error)
         return token
+      }
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {
+      try {
+        if (token) {
+          session.user.id = token.id
+          session.user.email = token.email
+          session.user.name = token.name
+        }
+        return session
+      } catch (error) {
+        console.error("Session callback error:", error)
+        return session
       }
     },
   },
@@ -87,5 +89,10 @@ export const authOptions = {
     error: "/login?error=true",
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  debug: false, // Disable debug in production
+  
+  // Add production-specific settings
+  cookies: {
+    secure: process.env.NODE_ENV === "production",
+  },
 }
