@@ -90,9 +90,4 @@ export const authOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: false, // Disable debug in production
-  
-  // Add production-specific settings
-  cookies: {
-    secure: process.env.NODE_ENV === "production",
-  },
 }
