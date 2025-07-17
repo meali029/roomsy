@@ -28,8 +28,8 @@ export default function ListingsPage() {
   useEffect(() => {
     async function fetchListings() {
       try {
-        // Use mock API first to test if endpoints are working
-        const res = await fetch('/api/listings/mock')
+        // Fetch from real database API
+        const res = await fetch('/api/listings')
         
         if (!res.ok) {
           throw new Error(`Failed to fetch listings: ${res.status}`)
