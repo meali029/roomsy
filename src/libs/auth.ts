@@ -8,7 +8,7 @@ import { prisma } from "@/libs/prisma"
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
-
+  
   providers: [
     // 🔐 Email + Password
     CredentialsProvider({
@@ -33,11 +33,13 @@ export const authOptions = {
       },
     }),
 
-    // 🔐 Google OAuth (optional for now)
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    }),
+    // 🔐 Google OAuth (only if credentials are provided)
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      })
+    ] : []),
   ],
 
   session: {

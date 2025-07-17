@@ -1,5 +1,7 @@
 // src/app/listing/page.tsx
+"use client"
 
+import { useState, useEffect } from 'react'
 import ListingCard from "@/components/listing/ListingCard"
 
 interface Listing {
@@ -18,67 +20,77 @@ interface Listing {
   }
 }
 
-export default async function ListingsPage() {
-  try {
-    // Use absolute URL for server-side fetch
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/listings`, {
-      cache: "no-store",
-    })
+export default function ListingsPage() {
+  const [listings, setListings] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-    if (!res.ok) {
-      console.error('Failed to fetch listings:', res.status, res.statusText)
-      // Instead of throwing error, show empty state
-      return (
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">Available Listings</h1>
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <p className="text-yellow-800">
-              Unable to load listings. Please make sure your database is connected and the server is running.
-            </p>
-          </div>
-        </div>
-      )
+  useEffect(() => {
+    async function fetchListings() {
+      try {
+        const res = await fetch('/api/listings')
+        
+        if (!res.ok) {
+          throw new Error(`Failed to fetch listings: ${res.status}`)
+        }
+
+        const data = await res.json()
+        setListings(data.listings || [])
+      } catch (err) {
+        console.error('Error fetching listings:', err)
+        setError('Failed to load listings. Please try again later.')
+      } finally {
+        setLoading(false)
+      }
     }
 
-    const data = await res.json()
-    const listings: Listing[] = data.listings || []
+    fetchListings()
+  }, [])
 
+  if (loading) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-10">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">Available Listings</h1>
-
-        {listings.length === 0 ? (
-          <p className="text-gray-500">No listings found.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {listings.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                id={listing.id}
-                title={listing.title}
-                city={listing.city}
-                rent={listing.rent}
-                genderPreference={listing.genderPreference}
-                availableFrom={listing.availableFrom}
-                imageUrl={listing.imageUrls[0]}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    )
-  } catch (error) {
-    console.error('Error in ListingsPage:', error)
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">Available Listings</h1>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <p className="text-red-800">
-            An error occurred while loading listings. Please try again later.
-          </p>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       </div>
     )
   }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <h1 className="text-3xl font-bold mb-6 text-gray-800">Available Listings</h1>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <p className="text-red-800">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-10">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Available Listings</h1>
+
+      {listings.length === 0 ? (
+        <p className="text-gray-500">No listings found.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              id={listing.id}
+              title={listing.title}
+              city={listing.city}
+              rent={listing.rent}
+              genderPreference={listing.genderPreference}
+              availableFrom={listing.availableFrom}
+              imageUrl={listing.imageUrls[0]}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
