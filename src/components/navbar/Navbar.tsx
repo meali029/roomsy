@@ -1,12 +1,23 @@
 "use client"
 
 import Link from "next/link"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { usePathname } from "next/navigation"
 
 export default function Navbar() {
   const { data: session } = useSession()
   const pathname = usePathname()
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ 
+        callbackUrl: "/",
+        redirect: true 
+      })
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
+  }
 
   const navLinks = [
     { label: "Home", href: "/" },
@@ -56,6 +67,12 @@ export default function Navbar() {
               >
                 {session.user.name?.split(" ")[0]}
               </Link>
+              <button
+                onClick={handleLogout}
+                className="text-sm bg-red-100 text-red-700 px-3 py-1.5 rounded-full font-medium hover:bg-red-200 transition-colors"
+              >
+                Logout
+              </button>
             </>
           ) : (
             <>
