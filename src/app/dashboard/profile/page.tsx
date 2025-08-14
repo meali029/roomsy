@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
+export const dynamic = 'force-dynamic'
+
 interface UserProfile {
   id: string
   name: string
@@ -25,6 +27,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [statusMsg, setStatusMsg] = useState<string>("")
 
   useEffect(() => {
     if (status === "loading") return
@@ -39,6 +42,8 @@ export default function ProfilePage() {
         if (res.ok) {
           const data = await res.json()
           setProfile(data.user)
+        } else if (res.status === 503) {
+          setStatusMsg("Database unavailable. Please try again shortly.")
         }
       } catch (error) {
         console.error("Error fetching profile:", error)
@@ -66,7 +71,9 @@ export default function ProfilePage() {
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">My Profile</h1>
       
-      {profile ? (
+      {statusMsg ? (
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded p-4">{statusMsg}</div>
+      ) : profile ? (
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>

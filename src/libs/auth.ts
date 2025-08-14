@@ -5,10 +5,8 @@ import { prisma } from "@/libs/prisma"
 import bcrypt from "bcryptjs"
 
 export const authOptions = {
-  // Note: Prisma adapter doesn't work with Credentials provider for database sessions
-  // We'll use JWT sessions but still connect to database for user validation
   providers: [
-    // 🔐 Email + Password with database validation
+    // 🔐 Email + Password - Simplified for production
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -16,41 +14,22 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          console.log("Missing credentials:", { email: !!credentials?.email, password: !!credentials?.password })
-          return null
-        }
-        
-        console.log("Auth attempt:", { email: credentials.email })
-        
-        try {
-          // Find user in database
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email }
-          })
-          
-          if (!user) {
-            console.log("User not found")
-            return null
-          }
-          
-          // Verify password
-          const isValidPassword = await bcrypt.compare(credentials.password, user.password)
-          
-          if (!isValidPassword) {
-            console.log("Invalid password")
-            return null
-          }
-          
-          console.log("Auth successful:", { id: user.id, email: user.email, name: user.name })
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name
-          }
-        } catch (error) {
-          console.error("Auth error:", error)
-          return null
+        if (!credentials?.email || !credentials?.password) return null
+
+        // 1) Look up user in DB
+        const user = await prisma.user.findUnique({ where: { email: credentials.email } })
+        if (!user || !user.password) return null
+
+        // 2) Compare password
+        const valid = await bcrypt.compare(credentials.password, user.password)
+        if (!valid) return null
+
+        // 3) Return minimal, trusted user object for JWT
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
         }
       },
     }),
@@ -62,20 +41,22 @@ export const authOptions = {
 
   callbacks: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user }: { token: any; user?: any }) {
+  async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
         token.id = user.id
         token.email = user.email
         token.name = user.name
+    token.role = user.role
       }
       return token
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, token }: { session: any; token: any }) {
+  async session({ session, token }: { session: any; token: any }) {
       if (token) {
         session.user.id = token.id
         session.user.email = token.email
         session.user.name = token.name
+    session.user.role = token.role ?? "USER"
       }
       return session
     },

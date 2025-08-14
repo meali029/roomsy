@@ -13,37 +13,17 @@ export default function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("") // Clear previous errors
 
-    console.log("Login attempt:", { email, passwordLength: password.length })
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    })
 
-    if (!email || !password) {
-      setError("Please enter both email and password")
-      return
-    }
-
-    try {
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      })
-
-      console.log("SignIn response:", res)
-
-      if (res?.error) {
-        console.error("SignIn error:", res.error)
-        setError("Invalid email or password")
-      } else if (res?.ok) {
-        console.log("Login successful, redirecting...")
-        router.push("/dashboard")
-      } else {
-        console.error("Unexpected response:", res)
-        setError("Login failed. Please try again.")
-      }
-    } catch (error) {
-      console.error("Login exception:", error)
-      setError("An error occurred. Please try again.")
+    if (res?.error) {
+      setError("Invalid email or password")
+    } else {
+      router.push("/dashboard/profile")
     }
   }
 

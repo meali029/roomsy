@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/libs/auth"
 import { prisma } from "@/libs/prisma"
+import { Prisma } from "@prisma/client"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
@@ -39,7 +40,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     return res.status(200).json({ user })
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string }
+    if (
+      error instanceof Prisma.PrismaClientInitializationError ||
+      err.code === "P1001" ||
+      /Can't reach database server/i.test(err.message || "")
+    ) {
+      return res.status(503).json({ message: "Database unavailable. Please try again shortly." })
+    }
     console.error("Profile API error:", error)
     return res.status(500).json({ message: "Internal server error" })
   }

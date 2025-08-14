@@ -12,15 +12,18 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const googleMapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter?.className ?? ""}>
         <Providers>
           <Navbar />
-          <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
-          strategy="beforeInteractive"
-        />
+          {googleMapsKey ? (
+            <Script
+              src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}&libraries=places`}
+              strategy="afterInteractive"
+            />
+          ) : null}
           <main className="min-h-screen pt-16 px-4 md:px-8 bg-gray-50">
             {children}
           </main>

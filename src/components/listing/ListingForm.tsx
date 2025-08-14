@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import MapPicker from "@/components/map/MapPicker"
 
-interface ListingFormData {
+export interface ListingFormData {
   title: string
   description: string
   rent: string
@@ -17,11 +17,13 @@ interface ListingFormData {
   imageUrls: string[]
 }
 
-interface ListingFormProps {
+export interface ListingFormProps {
   defaultValues?: ListingFormData
+  onSubmit?: (data: ListingFormData) => Promise<void> | void
+  submitLabel?: string
 }
 
-export default function ListingForm({ defaultValues }: ListingFormProps) {
+export default function ListingForm({ defaultValues, onSubmit, submitLabel }: ListingFormProps) {
   const router = useRouter()
 
   const [formData, setFormData] = useState(
@@ -79,15 +81,23 @@ export default function ListingForm({ defaultValues }: ListingFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const res = await fetch("/api/listings", {
-      method: "POST",
-      body: JSON.stringify(formData),
-      headers: { "Content-Type": "application/json" },
-    })
-
-    if (res.ok) {
-      router.push("/dashboard/listings")
-    } else {
+    try {
+      if (onSubmit) {
+        await onSubmit(formData)
+        return
+      }
+      const res = await fetch("/api/listings", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+      })
+      if (res.ok) {
+        router.push("/dashboard/listings")
+      } else {
+        const err = await res.json().catch(() => ({}))
+        alert(err.message || "Something went wrong")
+      }
+    } catch {
       alert("Something went wrong")
     }
   }
@@ -139,7 +149,7 @@ export default function ListingForm({ defaultValues }: ListingFormProps) {
 />
 
       <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
-        Post Listing
+        {submitLabel || "Post Listing"}
       </button>
     </form>
   )

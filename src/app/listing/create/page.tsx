@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 
+export const dynamic = 'force-dynamic'
+
 export default function CreateListingPage() {
   const router = useRouter()
   const { data: session, status } = useSession()

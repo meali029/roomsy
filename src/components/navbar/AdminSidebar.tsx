@@ -2,13 +2,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LogOut } from "lucide-react"
 
 const adminLinks = [
   { label: "Dashboard", href: "/admin" },
   { label: "Users", href: "/admin/users" },
-  { label: "Listings", href: "/admin/listings" },
-  { label: "Reports", href: "/admin/reports" },
   { label: "Verifications", href: "/admin/verifications" },
 ]
 
@@ -36,12 +33,6 @@ export default function AdminSidebar() {
           </Link>
         ))}
       </nav>
-
-      <div className="p-4 border-t border-gray-700">
-        <button className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300">
-          <LogOut size={16} /> Logout
-        </button>
-      </div>
     </aside>
   )
 }
