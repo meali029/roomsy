@@ -1,7 +1,304 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.input {
-  @apply w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply font-sans antialiased;
+    background-color: #ffffff;
+    color: #000000;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight text-black;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl font-semibold;
+  }
+}
+
+@layer components {
+  /* Glassmorphism utility classes using new palette */
+  .glass-darkest {
+    @apply backdrop-blur-xl border border-white/20 shadow-glass;
+    background: rgba(5, 31, 32, 0.8);
+  }
+  
+  .glass-teal {
+    @apply backdrop-blur-xl border border-white/20 shadow-glass;
+    background: rgba(11, 43, 38, 0.8);
+  }
+  
+  .glass-forest {
+    @apply backdrop-blur-xl border border-white/20 shadow-glass;
+    background: rgba(22, 56, 50, 0.8);
+  }
+  
+  .glass-rich {
+    @apply backdrop-blur-xl border border-white/20 shadow-glass;
+    background: rgba(35, 83, 71, 0.8);
+  }
+  
+  .glass-sage {
+    @apply backdrop-blur-xl border border-white/20 shadow-glass;
+    background: rgba(142, 182, 155, 0.8);
+  }
+  
+  .glass-mint {
+    @apply backdrop-blur-xl border border-white/20 shadow-glass;
+    background: rgba(218, 241, 222, 0.8);
+  }
+  
+  /* Button styles - single color per button with hover brightness */
+  .btn-darkest {
+    @apply bg-darkest-green text-white px-8 py-4 rounded-full font-semibold
+           shadow-lg transition-all duration-300 ease-in-out
+           hover:scale-105 hover:brightness-90;
+  }
+  
+  .btn-teal {
+    @apply bg-deep-teal text-white px-8 py-4 rounded-full font-semibold
+           shadow-lg transition-all duration-300 ease-in-out
+           hover:scale-105 hover:brightness-110;
+  }
+  
+  .btn-forest {
+    @apply bg-forest-teal text-white px-8 py-4 rounded-full font-semibold
+           shadow-lg transition-all duration-300 ease-in-out
+           hover:scale-105 hover:brightness-110;
+  }
+  
+  .btn-rich {
+    @apply bg-rich-green text-white px-8 py-4 rounded-full font-semibold
+           shadow-lg transition-all duration-300 ease-in-out
+           hover:scale-105 hover:brightness-110;
+  }
+  
+  .btn-sage {
+    @apply bg-soft-sage text-black px-8 py-4 rounded-full font-semibold
+           shadow-lg transition-all duration-300 ease-in-out
+           hover:scale-105 hover:brightness-90;
+  }
+  
+  .btn-mint {
+    @apply bg-mint-cream text-black px-8 py-4 rounded-full font-semibold
+           shadow-lg transition-all duration-300 ease-in-out
+           hover:scale-105 hover:brightness-95;
+  }
+  
+  /* Card styles with single color themes */
+  .card-darkest {
+    @apply bg-darkest-green/5 backdrop-blur-sm rounded-xl shadow-soft border border-darkest-green/10
+           hover:bg-darkest-green/10 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]
+           transition-all duration-300 ease-in-out;
+  }
+  
+  .card-teal {
+    @apply bg-deep-teal/5 backdrop-blur-sm rounded-xl shadow-soft border border-deep-teal/10
+           hover:bg-deep-teal/10 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]
+           transition-all duration-300 ease-in-out;
+  }
+  
+  .card-sage {
+    @apply bg-soft-sage/10 backdrop-blur-sm rounded-xl shadow-soft border border-soft-sage/20
+           hover:bg-soft-sage/20 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]
+           transition-all duration-300 ease-in-out;
+  }
+  
+  .card-mint {
+    @apply bg-mint-cream/50 backdrop-blur-sm rounded-xl shadow-soft border border-mint-cream/70
+           hover:bg-mint-cream/70 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02]
+           transition-all duration-300 ease-in-out;
+  }
+  
+  /* Input styles with single color focus */
+  .input-teal {
+    @apply w-full px-6 py-4 bg-white/80 border-2 border-deep-teal/20 rounded-xl 
+           shadow-inner backdrop-blur-sm
+           focus:outline-none focus:border-deep-teal focus:ring-4 focus:ring-deep-teal/20
+           focus:bg-white focus:shadow-soft
+           transition-all duration-300 ease-in-out
+           placeholder:text-black/50;
+  }
+  
+  .input-sage {
+    @apply w-full px-6 py-4 bg-white/80 border-2 border-soft-sage/30 rounded-xl 
+           shadow-inner backdrop-blur-sm
+           focus:outline-none focus:border-soft-sage focus:ring-4 focus:ring-soft-sage/20
+           focus:bg-white focus:shadow-soft
+           transition-all duration-300 ease-in-out
+           placeholder:text-black/50;
+  }
+  
+  /* Layout spacing */
+  .section-spacing {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+  
+  .container-spacing {
+    @apply px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16;
+  }
+  
+  /* Mobile bottom navbar with teal theme */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50 glass-teal border-t border-white/20
+           px-4 py-2 md:hidden;
+  }
+  
+  .bottom-nav-item {
+    @apply flex flex-col items-center justify-center p-3 rounded-xl
+           text-xs font-medium text-white/70
+           hover:text-white hover:bg-white/10
+           transition-all duration-200 ease-in-out;
+  }
+  
+  .bottom-nav-item.active {
+    @apply text-white bg-white/20 shadow-soft;
+  }
+  
+  /* Trust badge with sage theme */
+  .trust-badge {
+    @apply inline-flex items-center px-4 py-2 bg-soft-sage/20 text-rich-green 
+           rounded-full text-sm font-medium backdrop-blur-sm border border-soft-sage/30;
+  }
+  
+  /* Icon circle with single color */
+  .icon-circle-teal {
+    @apply w-16 h-16 rounded-xl bg-deep-teal/10 
+           flex items-center justify-center text-deep-teal shadow-soft;
+  }
+  
+  .icon-circle-sage {
+    @apply w-16 h-16 rounded-xl bg-soft-sage/20 
+           flex items-center justify-center text-rich-green shadow-soft;
+  }
+  
+  /* Floating elements */
+  .float-element {
+    @apply animate-float;
+  }
+}
+
+/* Enhanced animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(128, 180, 140, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(128, 180, 140, 0.6);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Custom scrollbar with new palette */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-mint-cream rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-rich-green rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-forest-teal;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .section-spacing {
+    @apply py-10;
+  }
+  
+  .container-spacing {
+    @apply px-4;
+  }
+}
+
+/* Smooth transitions for route changes */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
 }

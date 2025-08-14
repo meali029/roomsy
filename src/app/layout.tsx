@@ -1,10 +1,21 @@
 import "./globals.css"
-import { Inter } from "next/font/google"
+import { Poppins, Inter } from "next/font/google"
 import { Providers } from "./Providers"
-import Navbar from "../components/navbar/Navbar"
+import ConditionalLayout from "../components/shared/ConditionalLayout"
 import Script from "next/script"
 
-const inter = Inter({ subsets: ["latin"] })
+const poppins = Poppins({ 
+  subsets: ["latin"],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-poppins',
+  display: 'swap'
+})
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: '--font-inter',
+  display: 'swap'
+})
 
 export const metadata = {
   title: "Roomsy.pk – Find Trusted Roommates",
@@ -14,19 +25,18 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const googleMapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
   return (
-    <html lang="en">
-      <body className={inter?.className ?? ""}>
+    <html lang="en" className={`${poppins.variable} ${inter.variable}`}>
+      <body className={`${poppins.className} antialiased`}>
         <Providers>
-          <Navbar />
           {googleMapsKey ? (
             <Script
               src={`https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}&libraries=places`}
               strategy="afterInteractive"
             />
           ) : null}
-          <main className="min-h-screen pt-16 px-4 md:px-8 bg-gray-50">
+          <ConditionalLayout>
             {children}
-          </main>
+          </ConditionalLayout>
         </Providers>
       </body>
     </html>
