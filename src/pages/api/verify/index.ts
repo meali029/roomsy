@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/libs/auth"
 import { prisma } from "@/libs/prisma"
 import { supabase } from "@/libs/supabase"
+import { randomUUID } from "crypto"
 
 async function requireAuth(req: NextApiRequest, res: NextApiResponse) {
   const session = await getServerSession(req, res, authOptions)
@@ -40,6 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { userId: session.user.id },
         update: { cnicUrl: publicUrl.publicUrl, status: "PENDING" },
         create: {
+          id: randomUUID(),
           userId: session.user.id,
           cnicUrl: publicUrl.publicUrl,
           videoUrl: "",
@@ -57,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const requests = await prisma.verificationRequest.findMany({
         where: { status: "PENDING" },
-        include: { user: { select: { id: true, name: true, email: true } } },
+        include: { User: { select: { id: true, name: true, email: true } } },
         orderBy: { createdAt: "desc" },
       })
       return res.status(200).json({ requests })

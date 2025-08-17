@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic"
 interface VerificationRequest {
   id: string
   cnicUrl: string
-  user: {
+  User: {
     id: string
     name: string
     email: string
@@ -17,7 +17,7 @@ async function fetchPending(): Promise<{ requests: VerificationRequest[] }> {
     
     const requests = await prisma.verificationRequest.findMany({
       where: { status: "PENDING" },
-      include: { user: { select: { id: true, name: true, email: true } } },
+      include: { User: { select: { id: true, name: true, email: true } } },
       orderBy: { createdAt: "desc" },
     })
     
@@ -42,7 +42,7 @@ export default async function AdminVerificationsPage() {
             <li key={r.id} className="bg-white rounded-lg shadow p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold">{r.user.name} ({r.user.email})</div>
+                  <div className="font-semibold">{r.User.name} ({r.User.email})</div>
                   <div className="text-sm text-gray-600 mt-1">
                     <a href={r.cnicUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline">View CNIC</a>
                   </div>

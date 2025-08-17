@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/libs/auth"
 import { prisma } from "@/libs/prisma"
 import { Prisma } from "@prisma/client"
+import { randomUUID } from "crypto"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -32,6 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const listing = await prisma.listing.create({
           data: {
+            id: randomUUID(),
             title,
             description,
             rent: Number(rent),

@@ -7,7 +7,7 @@ import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import RoomsyLoader from "../components/shared/RoomsyLoader"
-import { MotionDiv, MotionSection, FloatingElement, GlowingElement } from "../components/shared/MotionWrapper"
+import { MotionDiv, MotionSection, FloatingElement } from "../components/shared/MotionWrapper"
 import { useListings } from "../hooks/useListings"
 import { 
   Shield, 
@@ -17,7 +17,6 @@ import {
   CheckCircle,
   Sparkles,
   Heart,
-  TrendingUp,
   Clock,
   Award,
   Zap,

@@ -3,6 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import { prisma } from "@/libs/prisma"
 import bcrypt from "bcryptjs"
+import { randomUUID } from "crypto"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -26,6 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await prisma.user.create({
       data: {
+        id: randomUUID(),
         name,
         email,
         password: hashedPassword,
