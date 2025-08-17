@@ -79,8 +79,8 @@ export default function MobileBottomNav() {
       { 
         icon: MessageCircle, 
         label: "Messages", 
-        href: "/messages",
-        active: pathname.startsWith('/messages')
+        href: "/",
+        active: pathname === "/"
       },
       { 
         icon: User, 
