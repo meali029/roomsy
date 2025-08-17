@@ -42,6 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             availableMonths: Number(availableMonths),
             imageUrls,
             userId: session.user.id,
+            status: "PENDING", // Default to pending approval
           },
         })
         return res.status(201).json({ message: "Listing created", listing })
@@ -60,7 +61,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === "GET") {
       try {
+        // Only show approved listings for public browsing
         const listings = await prisma.listing.findMany({
+          where: {
+            status: "APPROVED"
+          },
           orderBy: { createdAt: "desc" },
           include: {
             user: {

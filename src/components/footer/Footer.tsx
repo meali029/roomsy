@@ -216,7 +216,7 @@ export default function Footer() {
 
           {/* Faded Roomsy Watermark - Bottom Edge Effect */}
           <div
-            className="relative w-full flex justify-center items-end select-none overflow-hidden px-0 mx-0"
+            className="relative w-full flex justify-center items-end select-none overflow-hidden px-0 mx-0 "
             style={{ 
               height: 'clamp(115px, 11vh, 260px)', // Responsive height
               paddingTop: '0.1rem',
@@ -238,7 +238,7 @@ export default function Footer() {
                   className={`
                     text-transparent 
                     bg-clip-text 
-                   
+                   pt-1
                     bg-gradient-to-r 
                     from-mint-cream via-white to-soft-sage 
                     bg-[length:200%_100%] 

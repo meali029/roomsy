@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { MapPin, Calendar, Users, Shield, Heart, Clock, CheckCircle, XCircle } from "lucide-react"
 
 interface ListingCardProps {
   id: string
@@ -11,6 +12,8 @@ interface ListingCardProps {
   genderPreference: string
   availableFrom: string
   imageUrl?: string
+  status?: "PENDING" | "APPROVED" | "REJECTED"
+  showStatus?: boolean // New prop to control status display
 }
 
 export default function ListingCard({
@@ -21,60 +24,141 @@ export default function ListingCard({
   genderPreference,
   availableFrom,
   imageUrl,
+  status = "APPROVED",
+  showStatus = false,
 }: ListingCardProps) {
+  const getStatusBadge = () => {
+    if (!showStatus) return null
+
+    switch (status) {
+      case "PENDING":
+        return (
+          <div className="absolute top-4 left-4">
+            <div className="bg-yellow-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full flex items-center text-xs font-medium">
+              <Clock className="w-3 h-3 mr-1" />
+              Pending Review
+            </div>
+          </div>
+        )
+      case "APPROVED":
+        return (
+          <div className="absolute top-4 left-4">
+            <div className="bg-green-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full flex items-center text-xs font-medium">
+              <CheckCircle className="w-3 h-3 mr-1" />
+              Approved
+            </div>
+          </div>
+        )
+      case "REJECTED":
+        return (
+          <div className="absolute top-4 left-4">
+            <div className="bg-red-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full flex items-center text-xs font-medium">
+              <XCircle className="w-3 h-3 mr-1" />
+              Rejected
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
   return (
     <Link
       href={`/listing/${id}`}
-      className="card block overflow-hidden group"
+      className="group block"
     >
-      <div className="relative w-full h-52 overflow-hidden rounded-t-2xl">
-        <Image
-          src={imageUrl || "/assets/room-placeholder.jpg"}
-          alt={title}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        <div className="absolute top-4 right-4">
-          <span className="trust-badge text-xs">
-            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            Verified
-          </span>
+      <div className="bg-white/95 backdrop-blur-sm border border-rich-green/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] overflow-hidden">
+        {/* Image Section */}
+        <div className="relative w-full h-56 overflow-hidden">
+          <Image
+            src={imageUrl || "/assets/room-placeholder.jpg"}
+            alt={title}
+            fill
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+          
+          {/* Overlay Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          
+          {/* Top Left Status Badge (if showing status) */}
+          {getStatusBadge()}
+          
+          {/* Top Right Badge */}
+          <div className="absolute top-4 right-4">
+            <div className="glass-mint px-3 py-1 rounded-full flex items-center text-rich-green text-xs font-medium">
+              <Shield className="w-3 h-3 mr-1" />
+              Verified
+            </div>
+          </div>
+          
+          {/* Heart Icon (only show if not showing status or if status is approved) */}
+          {(!showStatus || status === "APPROVED") && (
+            <div className="absolute top-4 left-4">
+              <button className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-rich-green hover:text-red-500 transition-colors">
+                <Heart className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          
+          {/* Bottom Price Tag */}
+          <div className="absolute bottom-4 left-4">
+            <div className="bg-rich-green text-white px-4 py-2 rounded-xl">
+              <div className="text-lg font-bold">Rs. {rent.toLocaleString()}</div>
+              <div className="text-xs opacity-90">per month</div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="p-6">
-        <h3 className="text-xl font-semibold text-neutral-800 mb-2 group-hover:text-primary-500 transition-colors">
-          {title}
-        </h3>
-        <div className="flex items-center text-neutral-600 mb-3">
-          <svg className="w-4 h-4 mr-2 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span className="text-sm font-medium">{city}</span>
-        </div>
-        
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-2xl font-bold text-primary-500">
-            Rs. {rent.toLocaleString()}
-            <span className="text-sm font-normal text-neutral-600">/month</span>
+        {/* Content Section */}
+        <div className="p-6">
+          {/* Title */}
+          <h3 className="text-xl font-bold text-rich-green mb-3 group-hover:text-forest-teal transition-colors line-clamp-2">
+            {title}
+          </h3>
+          
+          {/* Location */}
+          <div className="flex items-center text-rich-green/70 mb-4">
+            <MapPin className="w-4 h-4 mr-2 text-soft-sage" />
+            <span className="text-sm font-medium">{city}</span>
           </div>
-          <div className="px-3 py-1 bg-secondary-50 text-secondary-600 rounded-full text-sm font-medium">
-            {genderPreference}
+          
+          {/* Info Grid */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            {/* Gender Preference */}
+            <div className="flex items-center">
+              <Users className="w-4 h-4 mr-2 text-soft-sage" />
+              <div>
+                <div className="text-xs text-rich-green/60 uppercase tracking-wide">Preference</div>
+                <div className="text-sm font-medium text-rich-green">{genderPreference}</div>
+              </div>
+            </div>
+            
+            {/* Available Date */}
+            <div className="flex items-center">
+              <Calendar className="w-4 h-4 mr-2 text-soft-sage" />
+              <div>
+                <div className="text-xs text-rich-green/60 uppercase tracking-wide">Available</div>
+                <div className="text-sm font-medium text-rich-green">
+                  {new Date(availableFrom).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div className="flex items-center text-sm text-neutral-500">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Available from: {new Date(availableFrom).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-          })}
+          
+          {/* Call to Action */}
+          <div className="pt-4 border-t border-rich-green/10">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-rich-green/70">View Details</span>
+              <div className="w-8 h-8 bg-rich-green/10 rounded-full flex items-center justify-center group-hover:bg-rich-green group-hover:text-white transition-all">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Link>

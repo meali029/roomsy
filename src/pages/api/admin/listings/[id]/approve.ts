@@ -1,6 +1,63 @@
 import type { NextApiRequest, NextApiResponse } from "next"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/libs/auth"
+import { prisma } from "@/libs/prisma"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // This endpoint is disabled since status field doesn't exist in the database
-  return res.status(404).json({ message: "Not found" })
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" })
+  }
+
+  try {
+    const session = await getServerSession(req, res, authOptions)
+    if (!session?.user?.id) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    // Check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true }
+    })
+
+    if (user?.role !== "ADMIN") {
+      return res.status(403).json({ message: "Admin access required" })
+    }
+
+    const { id } = req.query
+    if (!id || typeof id !== "string") {
+      return res.status(400).json({ message: "Invalid listing ID" })
+    }
+
+    // Approve the listing
+    const listing = await prisma.listing.update({
+      where: { id },
+      data: {
+        status: "APPROVED",
+        approvedAt: new Date(),
+        rejectedAt: null,
+        rejectionReason: null,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    return res.status(200).json({ 
+      message: "Listing approved successfully", 
+      listing 
+    })
+  } catch (error) {
+    console.error("Error approving listing:", error)
+    return res.status(500).json({ 
+      message: "Internal server error",
+      error: error instanceof Error ? error.message : "Unknown error"
+    })
+  }
 }

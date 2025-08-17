@@ -9,11 +9,13 @@ async function getAdminStats() {
     const [
       totalUsers,
       totalListings,
+      pendingListings,
       totalReviews,
       pendingVerifications,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.listing.count(),
+      prisma.listing.count({ where: { status: "PENDING" } }),
       prisma.review.count(),
       prisma.verificationRequest.count({ where: { status: "PENDING" } }),
     ])
@@ -21,6 +23,7 @@ async function getAdminStats() {
     return {
       totalUsers,
       totalListings,
+      pendingListings,
       totalReviews,
       pendingVerifications,
     }
@@ -34,6 +37,7 @@ async function getAdminStats() {
       return {
         totalUsers: 0,
         totalListings: 0,
+        pendingListings: 0,
         totalReviews: 0,
         pendingVerifications: 0,
         error: "Database unavailable",
@@ -91,6 +95,20 @@ export default async function AdminDashboard() {
 
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center">
+            <div className="p-2 bg-orange-500 rounded-lg">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Pending Listings</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.pendingListings}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <div className="flex items-center">
             <div className="p-2 bg-purple-500 rounded-lg">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
@@ -105,11 +123,17 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Pending Items */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Pending Verifications</h3>
           <p className="text-3xl font-bold text-orange-600">{stats.pendingVerifications}</p>
           <p className="text-sm text-gray-600 mt-1">User verifications awaiting review</p>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Pending Listings</h3>
+          <p className="text-3xl font-bold text-yellow-600">{stats.pendingListings}</p>
+          <p className="text-sm text-gray-600 mt-1">Listings awaiting approval</p>
         </div>
       </div>
 

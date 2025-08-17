@@ -126,6 +126,15 @@
   }
   
   /* Input styles with single color focus */
+  .input {
+    @apply w-full px-6 py-4 bg-white border-2 border-rich-green/20 rounded-xl 
+           shadow-lg backdrop-blur-sm text-rich-green
+           focus:outline-none focus:border-rich-green focus:ring-4 focus:ring-rich-green/10
+           focus:bg-white focus:shadow-xl
+           transition-all duration-300 ease-in-out
+           placeholder:text-rich-green/50;
+  }
+
   .input-teal {
     @apply w-full px-6 py-4 bg-white/80 border-2 border-deep-teal/20 rounded-xl 
            shadow-inner backdrop-blur-sm
@@ -149,8 +158,17 @@
     @apply py-16 md:py-24 lg:py-32;
   }
   
-  .container-spacing {
-    @apply px-4 md:px-6 lg:px-8 xl:px-12 2xl:px-16;
+    .container-spacing {
+    @apply px-6 md:px-8 lg:px-12;
+  }
+
+  /* Text utilities */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
   
   /* Mobile bottom navbar with teal theme */

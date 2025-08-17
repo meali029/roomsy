@@ -15,7 +15,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { id },
         include: {
           user: {
-            select: { id: true, name: true, city: true, gender: true, isVerified: true },
+            select: { 
+              id: true, 
+              name: true, 
+              email: true, 
+              city: true, 
+              gender: true, 
+              isVerified: true,
+              profession: true,
+              university: true,
+              createdAt: true
+            },
           },
         },
       })
@@ -30,6 +40,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // For public access, we can show all listings for now
         // TODO: Add approval system later if needed
       }
+      
+      // Set proper cache headers to prevent stale data issues
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+      res.setHeader('Pragma', 'no-cache')
+      res.setHeader('Expires', '0')
       
       return res.status(200).json({ listing })
     }

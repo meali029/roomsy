@@ -1,15 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import Image from "next/image"
+import ListingForm, { type ListingFormData } from "@/components/listing/ListingForm"
+import { Plus, CheckCircle, AlertCircle, ArrowRight, Users, Shield, Camera, MapPin, Clock } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
 export default function CreateListingPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -19,25 +22,15 @@ export default function CreateListingPage() {
     }
   }, [session, status, router])
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    rent: "",
-    city: "",
-    location: "",
-    genderPreference: "Any",
-    availableFrom: "",
-    availableMonths: 1,
-    imageUrls: [] as string[],
-  })
-
-  const [uploading, setUploading] = useState(false)
-
   // Show loading state
   if (status === "loading") {
     return (
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="text-center">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-mint-cream via-white to-soft-sage/20 flex items-center justify-center">
+        <div className="glass-mint p-8 rounded-2xl text-center max-w-md">
+          <div className="animate-spin w-12 h-12 border-4 border-rich-green border-t-transparent rounded-full mx-auto mb-6"></div>
+          <h2 className="text-xl font-bold text-rich-green mb-2">Setting up your workspace</h2>
+          <p className="text-rich-green/80">Please wait while we prepare everything for you...</p>
+        </div>
       </div>
     )
   }
@@ -45,182 +38,172 @@ export default function CreateListingPage() {
   // Show unauthorized state
   if (!session) {
     return (
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="text-center">Please log in to create a listing.</div>
+      <div className="min-h-screen bg-gradient-to-br from-mint-cream via-white to-soft-sage/20 flex items-center justify-center">
+        <div className="glass-mint p-8 rounded-2xl text-center max-w-md">
+          <Shield className="w-16 h-16 text-rich-green mx-auto mb-6" />
+          <h2 className="text-2xl font-bold text-rich-green mb-3">Authentication Required</h2>
+          <p className="text-rich-green/80 mb-6">You need to be logged in to create a listing. Join thousands of users finding their perfect roommates!</p>
+          <div className="space-y-3">
+            <button 
+              onClick={() => router.push("/login")}
+              className="btn-primary w-full"
+            >
+              Sign In to Continue
+            </button>
+            <button 
+              onClick={() => router.push("/register")}
+              className="btn-secondary w-full"
+            >
+              Create New Account
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+  // Success message
+  if (showSuccessMessage) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-mint-cream via-white to-soft-sage/20 flex items-center justify-center">
+        <div className="glass-mint p-8 rounded-2xl text-center max-w-md">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
+          <h2 className="text-2xl font-bold text-rich-green mb-3">Listing Submitted Successfully!</h2>
+          <p className="text-rich-green/80 mb-6">Your listing has been submitted for review. It will go live within 24 hours after admin approval. You can track the status from your dashboard.</p>
+          <div className="space-y-3">
+            <button 
+              onClick={() => router.push("/dashboard")}
+              className="btn-primary w-full"
+            >
+              View My Dashboard
+            </button>
+            <button 
+              onClick={() => router.push("/listing")}
+              className="btn-secondary w-full"
+            >
+              Browse All Listings
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const handleImageUpload = async (files: FileList | null) => {
-    if (!files) return
-    setUploading(true)
-
-    try {
-      const uploadedUrls: string[] = []
-
-      for (const file of Array.from(files)) {
-        try {
-          // Try Cloudinary first
-          const formData = new FormData()
-          formData.append("file", file)
-          formData.append("upload_preset", "roomsy")
-
-          const res = await fetch("https://api.cloudinary.com/v1_1/dvcwmbk6y/image/upload", {
-            method: "POST",
-            body: formData,
-          })
-
-          const data = await res.json()
-          
-          if (res.ok && data.secure_url) {
-            uploadedUrls.push(data.secure_url)
-            console.log("✅ Cloudinary upload successful:", data.secure_url)
-          } else {
-            throw new Error(`Cloudinary error: ${data.error?.message || 'Upload failed'}`)
-          }
-        } catch (cloudinaryError) {
-          console.error("❌ Cloudinary failed:", cloudinaryError)
-          
-          // Fallback: Use our API endpoint with placeholder
-          try {
-            const fallbackRes = await fetch("/api/upload/images", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ fileName: file.name })
-            })
-            
-            const fallbackData = await fallbackRes.json()
-            if (fallbackRes.ok && fallbackData.urls?.[0]) {
-              uploadedUrls.push(fallbackData.urls[0])
-              console.log("✅ Fallback upload successful")
-            } else {
-              throw new Error("Fallback also failed")
-            }
-          } catch (fallbackError) {
-            console.error("❌ Fallback failed:", fallbackError)
-            // Last resort: use placeholder
-            uploadedUrls.push("/assets/roomsy-hero.png")
-          }
-        }
-      }
-
-      setFormData((prev) => ({ ...prev, imageUrls: uploadedUrls }))
-      
-      if (uploadedUrls.length > 0) {
-        const hasCloudinaryUrls = uploadedUrls.some(url => url.includes('cloudinary'))
-        if (!hasCloudinaryUrls) {
-          alert("Image upload used placeholder. To upload real images, configure Cloudinary upload preset.")
-        }
-      }
-    } catch (error) {
-      console.error("❌ Upload error:", error)
-      alert("Image upload failed. Please try again.")
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const handleSubmit = async (data: ListingFormData) => {
+    setIsSubmitting(true)
+    
     try {
       const res = await fetch("/api/listings", {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
       })
 
       if (res.ok) {
-        alert("Listing created successfully!")
-        router.push("/listing")
+        // Show success message for 2 seconds, then redirect
+        setShowSuccessMessage(true)
+        setTimeout(() => {
+          router.push("/dashboard?created=true")
+        }, 2000)
       } else {
-        const errorData = await res.json()
-        alert(`Error: ${errorData.message || "Something went wrong."}`)
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.message || "Failed to create listing")
       }
     } catch (error) {
       console.error("Error creating listing:", error)
-      alert("Network error. Please try again.")
+      alert(error instanceof Error ? error.message : "Network error. Please try again.")
+      setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Create Listing</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input name="title" value={formData.title} onChange={handleChange} required placeholder="Title" className="input" />
-        <textarea name="description" value={formData.description} onChange={handleChange} required placeholder="Description" className="input h-24" />
-        <input name="rent" type="number" value={formData.rent} onChange={handleChange} required placeholder="Monthly Rent" className="input" />
-        <input name="city" value={formData.city} onChange={handleChange} required placeholder="City" className="input" />
-        <input name="location" value={formData.location} onChange={handleChange} required placeholder="Exact Area (e.g., G-9, Johar Town)" className="input" />
-        <select name="genderPreference" value={formData.genderPreference} onChange={handleChange} className="input">
-          <option value="Any">Any</option>
-          <option value="Male">Only Males</option>
-          <option value="Female">Only Females</option>
-        </select>
-        <input name="availableFrom" type="date" value={formData.availableFrom} onChange={handleChange} required className="input" />
-        <input name="availableMonths" type="number" min={1} max={12} value={formData.availableMonths} onChange={handleChange} required className="input" placeholder="Available for how many months?" />
-
-        {/* 🔼 Image Upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Property Images (Optional)
-          </label>
-          <input 
-            type="file" 
-            multiple 
-            accept="image/*" 
-            onChange={(e) => handleImageUpload(e.target.files)} 
-            className="input" 
-          />
-          <div className="flex gap-2 mt-2">
-            <button
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, imageUrls: ["/assets/roomsy-hero.png"] }))}
-              className="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300"
-            >
-              Use Default Image
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, imageUrls: [] }))}
-              className="text-xs bg-red-200 text-red-700 px-3 py-1 rounded hover:bg-red-300"
-            >
-              No Images
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-soft-sage/5 via-mint-cream/10 to-white">
+      {/* Header */}
+      <div className="bg-white/90 backdrop-blur-sm border-b border-rich-green/20 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto container-spacing py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button
+                onClick={() => router.back()}
+                className="mr-4 p-2 rounded-lg bg-white/80 text-rich-green hover:scale-110 transition-transform border border-rich-green/10"
+              >
+                ←
+              </button>
+              <div>
+                <h1 className="text-3xl font-bold text-rich-green flex items-center">
+                  <Plus className="w-8 h-8 mr-3" />
+                  Create New Listing
+                </h1>
+                <p className="text-rich-green/70 mt-1">
+                  Share your space and find the perfect roommate
+                </p>
+              </div>
+            </div>
+            
+            <div className="hidden md:flex items-center space-x-4">
+              <div className="text-sm text-rich-green/70">
+                Signed in as <span className="font-medium">{session.user?.email}</span>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-gray-500 mt-1">
-            Upload up to 5 images of your property. If upload fails, a placeholder will be used.
-          </p>
         </div>
-        {uploading && <p className="text-sm text-yellow-500">Uploading images...</p>}
+      </div>
 
-        {/* 🔍 Preview uploaded images */}
-        {formData.imageUrls.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            {formData.imageUrls.map((url, i) => (
-              <Image 
-                key={i} 
-                src={url} 
-                alt={`preview-${i}`} 
-                width={200}
-                height={96}
-                className="w-full h-24 object-cover rounded" 
-              />
-            ))}
+      {/* Quick Tips Section */}
+      <div className="bg-white/60 backdrop-blur-sm border-b border-rich-green/10">
+        <div className="max-w-7xl mx-auto container-spacing py-8">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="flex items-start space-x-3 bg-white/80 p-4 rounded-xl border border-rich-green/10">
+              <Camera className="w-6 h-6 text-rich-green mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-rich-green mb-1">Great Photos</h3>
+                <p className="text-sm text-rich-green/70">Upload clear, well-lit photos to attract more inquiries</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3 bg-white/80 p-4 rounded-xl border border-rich-green/10">
+              <Users className="w-6 h-6 text-rich-green mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-rich-green mb-1">Detailed Description</h3>
+                <p className="text-sm text-rich-green/70">Describe your space and ideal roommate preferences</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3 bg-white/80 p-4 rounded-xl border border-rich-green/10">
+              <MapPin className="w-6 h-6 text-rich-green mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-rich-green mb-1">Accurate Location</h3>
+                <p className="text-sm text-rich-green/70">Provide precise location details for better matches</p>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+      </div>
 
-        <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">
-          Post Listing
-        </button>
-      </form>
+      {/* Form Content */}
+      <div className="container-spacing py-12">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-rich-green">Complete Your Listing</h2>
+            <div className="flex items-center space-x-2 text-sm text-rich-green/70">
+              <AlertCircle className="w-4 h-4" />
+              <span>All required fields marked with *</span>
+            </div>
+          </div>
+          <div className="bg-white/80 border border-rich-green/20 p-4 rounded-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Clock className="w-5 h-5 text-yellow-500" />
+                <span className="text-rich-green font-medium">Your listing will be reviewed and go live within 24 hours</span>
+              </div>
+              <ArrowRight className="w-5 h-5 text-rich-green/50" />
+            </div>
+          </div>
+        </div>
+
+        <ListingForm 
+          onSubmit={handleSubmit}
+          submitLabel={isSubmitting ? "Creating Listing..." : "🏠 Create Listing"}
+        />
+      </div>
     </div>
   )
 }

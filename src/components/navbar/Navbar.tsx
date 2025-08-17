@@ -78,7 +78,7 @@ export default function Navbar() {
       { label: "Home", href: "/" },
       { label: "Browse", href: "/listing" },
       { label: "Dashboard", href: "/dashboard" },
-      { label: "Messages", href: "/messages" },
+      { label: "Messages", href: "/" },
       { label: "Support", href: "/support" },
     ]
   }
