@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/libs/auth"
 import { prisma } from "@/libs/prisma"
-import { supabase } from "@/libs/supabase"
+import { uploadImageToCloudinary } from "@/libs/cloudinary"
 import { randomUUID } from "crypto"
 
 async function requireAuth(req: NextApiRequest, res: NextApiResponse) {
@@ -25,29 +25,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ message: "cnicBase64 is required" })
       }
 
-      // Upload to Supabase storage
-      const fileBytes = Buffer.from(cnicBase64.split(",").pop() || "", "base64")
-      const filePath = `cnic/${session.user.id}-${Date.now()}.png`
-      const { error: uploadError } = await supabase.storage.from("roomsy-cnic").upload(filePath, fileBytes, {
-        contentType: "image/png",
-        upsert: false,
-      })
-      if (uploadError) return res.status(500).json({ message: uploadError.message })
+      console.log("Starting CNIC upload for user:", session.user.id)
 
-      const { data: publicUrl } = supabase.storage.from("roomsy-cnic").getPublicUrl(filePath)
+      // Upload CNIC image to Cloudinary
+      const uploadResult = await uploadImageToCloudinary(
+        cnicBase64, 
+        'roomsy/cnic', // folder structure in Cloudinary
+        'image'
+      )
 
-      // Create or update verification request
+      if (!uploadResult.success) {
+        console.error("Cloudinary upload error:", uploadResult.error)
+        return res.status(500).json({ 
+          message: "Failed to upload image. Please try again.", 
+          error: uploadResult.error 
+        })
+      }
+
+      console.log("Image uploaded successfully to Cloudinary:", uploadResult.url)
+
+      // Now TypeScript knows uploadResult is the success type
+      const imageUrl = uploadResult.url
+
+      // Create or update verification request with Cloudinary URL
       const request = await prisma.verificationRequest.upsert({
         where: { userId: session.user.id },
-        update: { cnicUrl: publicUrl.publicUrl, status: "PENDING" },
+        update: { 
+          cnicUrl: imageUrl, 
+          status: "PENDING" 
+        },
         create: {
           id: randomUUID(),
           userId: session.user.id,
-          cnicUrl: publicUrl.publicUrl,
+          cnicUrl: imageUrl,
           videoUrl: "",
           status: "PENDING",
         },
       })
+
+      console.log("Verification request created/updated:", request.id)
 
       return res.status(201).json({ request })
     }

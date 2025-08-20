@@ -40,7 +40,12 @@ export default function LoginForm() {
       })
 
       if (res?.error) {
-        setError("Invalid email or password")
+        // Handle specific ban error messages
+        if (res.error.includes("Account banned:")) {
+          setError(res.error)
+        } else {
+          setError("Invalid email or password")
+        }
       } else {
         // Small delay to show success state
         setTimeout(() => {
@@ -77,10 +82,17 @@ export default function LoginForm() {
       </MotionDiv>
 
       {error && (
-        <MotionDiv direction="up" className="glass-mint border-2 border-red-300/50 rounded-xl p-2 mb-3">
-          <div className="flex items-center">
-            <AlertCircle className="w-4 h-4 text-red-600 mr-2" />
-            <p className="text-xs text-red-600 font-medium">{error}</p>
+        <MotionDiv direction="up" className="glass-mint border-2 border-red-300/50 rounded-xl p-3 mb-3">
+          <div className="flex items-start">
+            <AlertCircle className="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs text-red-600 font-medium leading-relaxed">{error}</p>
+              {error.includes("Account banned:") && (
+                <p className="text-xs text-red-500 mt-1">
+                  Contact support if you believe this is an error.
+                </p>
+              )}
+            </div>
           </div>
         </MotionDiv>
       )}

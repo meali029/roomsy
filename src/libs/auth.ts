@@ -20,11 +20,16 @@ export const authOptions = {
         const user = await prisma.user.findUnique({ where: { email: credentials.email } })
         if (!user || !user.password) return null
 
-        // 2) Compare password
+        // 2) Check if user is banned
+        if (user.isBanned) {
+          throw new Error(`Account banned: ${user.banReason || "Contact support for more information"}`)
+        }
+
+        // 3) Compare password
         const valid = await bcrypt.compare(credentials.password, user.password)
         if (!valid) return null
 
-        // 3) Return minimal, trusted user object for JWT
+        // 4) Return minimal, trusted user object for JWT
         return {
           id: user.id,
           email: user.email,
