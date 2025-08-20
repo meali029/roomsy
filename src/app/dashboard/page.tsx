@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/libs/auth"
+import { prisma } from "@/libs/prisma"
 import CnicUploader from "@/components/auth/CnicUploader"
 import { 
   Home, 
@@ -40,58 +41,66 @@ type ListingItem = {
   user: { id: string; name?: string | null }
 }
 
-type ProfileResponse = { user: UserProfile } | { message: string }
-
-async function fetchProfile(): Promise<ProfileResponse> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ""
-    const res = await fetch(`${baseUrl}/api/user/profile`, {
-      cache: "no-store",
-    })
-    if (!res.ok) {
-      return { message: `Profile unavailable (${res.status})` }
-    }
-    return res.json()
-  } catch (error) {
-    console.error("Profile fetch error:", error)
-    return { message: "Profile unavailable" }
-  }
-}
-
-async function fetchListings(): Promise<{ listings: ListingItem[] }> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ""
-    const res = await fetch(`${baseUrl}/api/listings`, {
-      cache: "no-store",
-    })
-    if (!res.ok) return { listings: [] }
-    return res.json()
-  } catch (error) {
-    console.error("Listings fetch error:", error)
-    return { listings: [] }
-  }
-}
-
 export default async function DashboardPage() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) redirect("/login")
 
-    const [profileRes, listingsRes] = await Promise.all([
-      fetchProfile().catch(err => {
-        console.error("Profile fetch failed:", err)
-        return { message: "Profile unavailable" }
-      }),
-      fetchListings().catch(err => {
-        console.error("Listings fetch failed:", err)
-        return { listings: [] }
+    // Use session data for profile instead of API call
+    const profile: UserProfile = {
+      id: session.user.id,
+      name: session.user.name || "User",
+      email: session.user.email || "",
+      role: session.user.role || "USER",
+      city: "Not set",
+      isVerified: false
+    }
+
+    // Fetch user details from database directly
+    try {
+      const userFromDb = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          city: true,
+          isVerified: true,
+        },
       })
-    ])
+      if (userFromDb) {
+        profile.city = userFromDb.city || "Not set"
+        profile.isVerified = userFromDb.isVerified
+      }
+    } catch (dbError) {
+      console.error("Database query error:", dbError)
+      // Continue with session data
+    }
 
-    const profile = "user" in profileRes ? profileRes.user : undefined
-    const statusMsg = "message" in profileRes ? profileRes.message : undefined
+    // Get listings with simplified approach
+    let allListings: ListingItem[] = []
+    try {
+      const listings = await prisma.listing.findMany({
+        select: {
+          id: true,
+          title: true,
+          city: true,
+          rent: true,
+          imageUrls: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+      })
+      allListings = listings as ListingItem[]
+    } catch (dbError) {
+      console.error("Listings query error:", dbError)
+      // Continue with empty array
+    }
 
-    const allListings = (listingsRes?.listings || []) as ListingItem[]
+    const statusMsg: string | undefined = undefined
     const myListings = allListings.filter((l) => l.user?.id === session.user.id).slice(0, 3)
 
     return (
