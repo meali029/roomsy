@@ -160,21 +160,22 @@ export default function ListingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-soft-sage/5 via-mint-cream/10 to-white">
-        <div className="bg-gradient-to-r from-rich-green to-forest-teal text-white">
-          <div className="max-w-7xl mx-auto container-spacing py-16">
-            <div className="text-center">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
-                Find Your Perfect Roommate
-              </h1>
-              <p className="text-xl text-mint-cream/90 max-w-3xl mx-auto">
-                Discovering amazing listings across Pakistan...
-              </p>
+      <div className="min-h-screen bg-mint-cream/30">
+        <div className="max-w-7xl mx-auto container-spacing py-8">
+          {/* Header Section */}
+          <div className="bg-gradient-to-br from-rich-green via-forest-teal to-deep-teal text-white rounded-2xl p-8 shadow-deep-teal mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="mb-6 md:mb-0">
+                <h1 className="text-3xl md:text-4xl font-bold mb-2 text-white">
+                  Find Your Perfect Roommate
+                </h1>
+                <p className="text-mint-cream/90 text-lg">
+                  Discovering amazing listings across Pakistan...
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="max-w-7xl mx-auto container-spacing py-16">
-          <div className="flex justify-center items-center">
+          <div className="flex justify-center items-center py-16">
             <RoomsyLoader size="lg" text="Finding perfect roommates for you..." />
           </div>
         </div>
@@ -184,20 +185,21 @@ export default function ListingsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-soft-sage/5 via-mint-cream/10 to-white">
-        <div className="bg-gradient-to-r from-rich-green to-forest-teal text-white">
-          <div className="max-w-7xl mx-auto container-spacing py-16">
-            <div className="text-center">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
-                Find Your Perfect Roommate
-              </h1>
-              <p className="text-xl text-mint-cream/90 max-w-3xl mx-auto">
-                Oops! Something went wrong while loading listings
-              </p>
+      <div className="min-h-screen bg-mint-cream/30">
+        <div className="max-w-7xl mx-auto container-spacing py-8">
+          {/* Header Section */}
+          <div className="bg-gradient-to-br from-rich-green via-forest-teal to-deep-teal text-white rounded-2xl p-8 shadow-deep-teal mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="mb-6 md:mb-0">
+                <h1 className="text-3xl md:text-4xl font-bold mb-2 text-white">
+                  Find Your Perfect Roommate
+                </h1>
+                <p className="text-mint-cream/90 text-lg">
+                  Oops! Something went wrong while loading listings
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="max-w-7xl mx-auto container-spacing py-16">
           <div className="bg-white/95 backdrop-blur-sm border border-red-200 rounded-2xl p-8 text-center max-w-md mx-auto">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,63 +221,76 @@ export default function ListingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-soft-sage/5 via-mint-cream/10 to-white">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r rounded-pill from-rich-green to-forest-teal text-white">
-        <div className="max-w-7xl mx-auto container-spacing py-16">
-          <div className="text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
-              Find Your Perfect Roommate
-            </h1>
-            <p className="text-xl text-mint-cream/90 max-w-3xl mx-auto mb-8">
-              Browse {listings.length} verified listings from trusted members across Pakistan
-            </p>
+    <div className="min-h-screen bg-mint-cream/30">
+      <div className="max-w-7xl mx-auto container-spacing py-8">
+        {/* Header Section */}
+        <div className="bg-gradient-to-br from-rich-green via-forest-teal to-deep-teal text-white rounded-2xl p-8 shadow-deep-teal mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div className="mb-6 md:mb-0">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2 text-white">
+                Find Your Perfect Roommate
+              </h1>
+              <p className="text-mint-cream/90 text-lg">
+                Browse {listings.length} verified listings from trusted members across Pakistan
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Link 
+                href="/listing/create"
+                className="glass-mint hover:bg-white/20 px-6 py-3 rounded-xl flex items-center space-x-2 transition-all duration-200 text-rich-green font-medium hover:scale-105"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Post Listing</span>
+              </Link>
+            </div>
+          </div>
             
-            {/* Hero Search */}
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="relative md:col-span-2">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-rich-green/60 w-5 h-5" />
-                    <input
-                      type="text"
-                      placeholder="Search by location, area, or university..."
-                      value={filters.search}
-                      onChange={(e) => handleFilterChange('search', e.target.value)}
-                      className="input pl-12 w-full"
-                    />
-                  </div>
-                  
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-rich-green/60 w-4 h-4" />
-                    <select 
-                      value={filters.city}
-                      onChange={(e) => handleFilterChange('city', e.target.value)}
-                      className="input pl-10 w-full"
-                    >
-                      <option value="">All Cities</option>
-                      {popularCities.map(city => (
-                        <option key={city.id} value={city.name}>{city.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <button 
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="btn-sage flex items-center justify-center gap-2"
-                  >
-                    <Filter className="w-4 h-4 " />
-                    Filters
-                  </button>
+          {/* Hero Search */}
+          <div className="mt-8">
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="relative md:col-span-2">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-rich-green/60 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search by location, area, or university..."
+                    value={filters.search}
+                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    className="input pl-12 w-full"
+                  />
                 </div>
+                
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-rich-green/60 w-4 h-4" />
+                  <select 
+                    value={filters.city}
+                    onChange={(e) => handleFilterChange('city', e.target.value)}
+                    className="input pl-10 w-full"
+                  >
+                    <option value="">All Cities</option>
+                    {popularCities.map(city => (
+                      <option key={city.id} value={city.name}>{city.name}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <button 
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="btn-sage flex items-center justify-center gap-2"
+                >
+                  <Filter className="w-4 h-4 " />
+                  Filters
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+        </div>
 
-      <div className="max-w-7xl mx-auto container-spacing">
-        {/* Advanced Filters */}
+        <div className="max-w-7xl mx-auto container-spacing">
+          {/* Advanced Filters */}
         {showFilters && (
           <div className="bg-white/95 backdrop-blur-sm border border-rich-green/20 rounded-2xl shadow-lg p-8 mb-8 -mt-8 relative z-10">
             <div className="flex items-center justify-between mb-6">
@@ -403,16 +418,6 @@ export default function ListingsPage() {
               {filteredListings.length !== listings.length && `Filtered from ${listings.length} total listings`}
             </p>
           </div>
-          
-          <Link 
-            href="/listing/create"
-            className="btn-primary flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Post Listing
-          </Link>
         </div>
 
         {/* Results Grid */}

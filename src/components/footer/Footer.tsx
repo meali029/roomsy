@@ -187,7 +187,7 @@ export default function Footer() {
                 © 2025 Roomsy.pk. All rights reserved.
               </p>
               <p className="text-white/60 text-xs">
-                Made with <Heart className="w-3 h-3 inline text-mint-cream" /> in Pakistan
+                Developed by <Heart className="w-3 h-3 inline text-mint-cream" /> Mehboob Ali
               </p>
             </div>
 
