@@ -17,7 +17,27 @@ export const authOptions = {
         if (!credentials?.email || !credentials?.password) return null
 
         // 1) Look up user in DB
-        const user = await prisma.user.findUnique({ where: { email: credentials.email } })
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            password: true,
+            role: true,
+            gender: true,
+            budget: true,
+            city: true,
+            university: true,
+            profession: true,
+            profilePicture: true,
+            isVerified: true,
+            privateProfile: true,
+            createdAt: true,
+            isBanned: true,
+            banReason: true,
+          },
+        })
         if (!user || !user.password) return null
 
         // 2) Check if user is banned

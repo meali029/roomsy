@@ -83,7 +83,7 @@ export default async function DashboardPage() {
                 Welcome back{profile?.name ? `, ${profile.name.split(' ')[0]}` : ""}! 👋
               </h1>
               <p className="text-indigo-100 text-lg">
-                Here's your dashboard overview and latest activity
+                Here&apos;s your dashboard overview and latest activity
               </p>
             </div>
             <div className="flex items-center space-x-2">
