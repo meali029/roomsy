@@ -97,7 +97,6 @@ export default function ListingForm({ defaultValues, onSubmit, submitLabel }: Li
     const uploadedUrls: string[] = []
 
     for (const file of Array.from(files)) {
-      console.log("Uploading file:", file.name, file.size, file.type)
       
       // Convert file to base64
       const reader = new FileReader()
@@ -116,9 +115,7 @@ export default function ListingForm({ defaultValues, onSubmit, submitLabel }: Li
           body: JSON.stringify({ image: base64 }),
         })
         
-        console.log("Upload response status:", res.status)
         const data = await res.json()
-        console.log("Upload response data:", data)
         
         if (!res.ok) {
           console.error("Upload error:", data)
@@ -128,7 +125,6 @@ export default function ListingForm({ defaultValues, onSubmit, submitLabel }: Li
         
         if (data.secure_url) {
           uploadedUrls.push(data.secure_url)
-          console.log("Successfully uploaded:", data.secure_url)
         }
       } catch (err) {
         console.error("Upload error", err)
@@ -136,7 +132,6 @@ export default function ListingForm({ defaultValues, onSubmit, submitLabel }: Li
       }
     }
 
-    console.log("All uploaded URLs:", uploadedUrls)
     setFormData((prev) => ({ 
       ...prev, 
       imageUrls: [...prev.imageUrls, ...uploadedUrls] 
@@ -154,8 +149,7 @@ export default function ListingForm({ defaultValues, onSubmit, submitLabel }: Li
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    console.log("Submitting form data:", formData)
-    console.log("Image URLs being submitted:", formData.imageUrls)
+ 
 
     try {
       if (onSubmit) {
@@ -169,7 +163,6 @@ export default function ListingForm({ defaultValues, onSubmit, submitLabel }: Li
       })
       
       const result = await res.json()
-      console.log("API response:", result)
       
       if (res.ok) {
         router.push("/dashboard")

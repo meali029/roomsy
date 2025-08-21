@@ -17,11 +17,48 @@ import {
   Shield,
   AlertTriangle,
   TrendingUp,
-  Users,
-  Star
+  Users
 } from "lucide-react"
 
 export const dynamic = "force-dynamic"
+
+// Helper function to get status display info
+function getStatusInfo(status: 'PENDING' | 'APPROVED' | 'REJECTED') {
+  switch (status) {
+    case 'APPROVED':
+      return {
+        label: 'Approved',
+        color: 'text-green-600',
+        bgColor: 'bg-green-100',
+        borderColor: 'border-green-200',
+        icon: CheckCircle
+      }
+    case 'PENDING':
+      return {
+        label: 'Pending Review',
+        color: 'text-yellow-600',
+        bgColor: 'bg-yellow-100',
+        borderColor: 'border-yellow-200',
+        icon: Clock
+      }
+    case 'REJECTED':
+      return {
+        label: 'Rejected',
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+        borderColor: 'border-red-200',
+        icon: AlertTriangle
+      }
+    default:
+      return {
+        label: 'Unknown',
+        color: 'text-gray-600',
+        bgColor: 'bg-gray-100',
+        borderColor: 'border-gray-200',
+        icon: AlertTriangle
+      }
+  }
+}
 
 type UserProfile = {
   id: string
@@ -38,6 +75,10 @@ type ListingItem = {
   city: string
   rent: number
   imageUrls: string[]
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  approvedAt: Date | null
+  rejectedAt: Date | null
+  rejectionReason: string | null
   user: { id: string; name?: string | null }
 }
 
@@ -84,6 +125,10 @@ export default async function DashboardPage() {
           city: true,
           rent: true,
           imageUrls: true,
+          status: true,
+          approvedAt: true,
+          rejectedAt: true,
+          rejectionReason: true,
           user: {
             select: {
               id: true,
@@ -102,6 +147,13 @@ export default async function DashboardPage() {
 
     const statusMsg: string | undefined = undefined
     const myListings = allListings.filter((l) => l.user?.id === session.user.id).slice(0, 3)
+    
+    // Calculate status counts for stats
+    const allMyListings = allListings.filter((l) => l.user?.id === session.user.id)
+    const statusCounts = allMyListings.reduce((acc, listing) => {
+      acc[listing.status] = (acc[listing.status] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
 
     return (
       <div className="min-h-screen bg-mint-cream/30">
@@ -158,6 +210,43 @@ export default async function DashboardPage() {
             </div>
           </div>
 
+          {/* Status Notifications */}
+          {statusCounts.REJECTED > 0 && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-8 rounded-r-lg shadow-soft">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-red-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    {statusCounts.REJECTED} listing{statusCounts.REJECTED > 1 ? 's' : ''} rejected
+                  </h3>
+                  <p className="text-sm text-red-700 mt-1">
+                    Please review the rejection reasons and update your listings accordingly.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {statusCounts.PENDING > 0 && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r-lg shadow-soft">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <Clock className="h-5 w-5 text-yellow-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    {statusCounts.PENDING} listing{statusCounts.PENDING > 1 ? 's' : ''} pending review
+                  </h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Your listings are being reviewed. This typically takes 24-48 hours.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Status Banner */}
           {statusMsg && (
             <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r-lg shadow-soft">
@@ -184,8 +273,36 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 <div className="ml-4 flex-1">
-                  <p className="text-sm font-medium text-rich-green/70">My Listings</p>
-                  <p className="text-2xl font-bold text-rich-green">{myListings.length}</p>
+                  <p className="text-sm font-medium text-rich-green/70">Total Listings</p>
+                  <p className="text-2xl font-bold text-rich-green">{allMyListings.length}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="card-sage p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-green-100 text-green-600 rounded-xl flex items-center justify-center shadow-soft">
+                    <CheckCircle className="w-6 h-6" />
+                  </div>
+                </div>
+                <div className="ml-4 flex-1">
+                  <p className="text-sm font-medium text-rich-green/70">Approved</p>
+                  <p className="text-2xl font-bold text-green-600">{statusCounts.APPROVED || 0}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="card-sage p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center shadow-soft">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                </div>
+                <div className="ml-4 flex-1">
+                  <p className="text-sm font-medium text-rich-green/70">Pending</p>
+                  <p className="text-2xl font-bold text-yellow-600">{statusCounts.PENDING || 0}</p>
                 </div>
               </div>
             </div>
@@ -209,36 +326,6 @@ export default async function DashboardPage() {
                     profile?.isVerified ? 'text-rich-green' : 'text-yellow-600'
                   }`}>
                     {profile?.isVerified ? '✓ Verified' : 'Pending Review'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="card-sage p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="icon-circle-teal">
-                    <MapPin className="w-6 h-6" />
-                  </div>
-                </div>
-                <div className="ml-4 flex-1">
-                  <p className="text-sm font-medium text-rich-green/70">Location</p>
-                  <p className="text-lg font-semibold text-rich-green">{profile?.city || "Not set"}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="card-sage p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="icon-circle-sage">
-                    <Star className="w-6 h-6" />
-                  </div>
-                </div>
-                <div className="ml-4 flex-1">
-                  <p className="text-sm font-medium text-rich-green/70">Account Type</p>
-                  <p className="text-lg font-semibold text-rich-green capitalize">
-                    {session.user.role?.toLowerCase() || "User"}
                   </p>
                 </div>
               </div>
@@ -272,7 +359,14 @@ export default async function DashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Home className="w-5 h-5 text-rich-green mr-2" />
-                      <h2 className="text-xl font-semibold text-rich-green">Your Recent Listings</h2>
+                      <div>
+                        <h2 className="text-xl font-semibold text-rich-green">Your Recent Listings</h2>
+                        {allMyListings.length > 0 && (
+                          <p className="text-sm text-rich-green/60 mt-1">
+                            {statusCounts.APPROVED || 0} approved • {statusCounts.PENDING || 0} pending • {statusCounts.REJECTED || 0} rejected
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <Link 
                       href="/listing/create" 
@@ -302,45 +396,78 @@ export default async function DashboardPage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {myListings.map((listing) => (
-                        <div key={listing.id} className="card-sage p-0 overflow-hidden">
-                          <div 
-                            className="h-48 bg-gradient-to-br from-mint-cream to-soft-sage/30 bg-cover bg-center"
-                            style={{
-                              backgroundImage: `url(${listing.imageUrls?.[0] || "/assets/room-placeholder.jpg"})`,
-                            }}
-                          />
-                          <div className="p-4 bg-white">
-                            <h3 className="font-semibold text-rich-green mb-2 line-clamp-1">
-                              {listing.title}
-                            </h3>
-                            <div className="flex items-center text-rich-green/70 text-sm mb-2">
-                              <MapPin className="w-4 h-4 mr-1" />
-                              <span>{listing.city}</span>
+                      {myListings.map((listing) => {
+                        const statusInfo = getStatusInfo(listing.status)
+                        const StatusIcon = statusInfo.icon
+                        
+                        return (
+                          <div key={listing.id} className="card-sage p-0 overflow-hidden">
+                            {/* Status Badge */}
+                            <div className="absolute top-4 right-4 z-10">
+                              <div className={`flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusInfo.bgColor} ${statusInfo.color} ${statusInfo.borderColor} border`}>
+                                <StatusIcon className="w-3 h-3 mr-1" />
+                                {statusInfo.label}
+                              </div>
                             </div>
-                            <div className="flex items-center text-rich-green font-semibold mb-4">
-                              <DollarSign className="w-4 h-4 mr-1" />
-                              <span>Rs. {listing.rent?.toLocaleString?.() || listing.rent}/month</span>
-                            </div>
-                            <div className="flex space-x-2">
-                              <Link 
-                                href={`/listing/${listing.id}`}
-                                className="flex-1 text-center px-3 py-2 text-sm font-medium text-rich-green border border-rich-green rounded-lg hover:bg-rich-green hover:text-white transition-all duration-200"
-                              >
-                                <Eye className="w-4 h-4 inline mr-1" />
-                                View
-                              </Link>
-                              <Link 
-                                href={`/listing/${listing.id}/edit`}
-                                className="flex-1 text-center px-3 py-2 text-sm font-medium text-rich-green/70 border border-soft-sage rounded-lg hover:bg-soft-sage/20 transition-all duration-200"
-                              >
-                                <Edit className="w-4 h-4 inline mr-1" />
-                                Edit
-                              </Link>
+                            
+                            <div 
+                              className="h-48 bg-gradient-to-br from-mint-cream to-soft-sage/30 bg-cover bg-center relative"
+                              style={{
+                                backgroundImage: `url(${listing.imageUrls?.[0] || "/assets/room-placeholder.jpg"})`,
+                              }}
+                            />
+                            <div className="p-4 bg-white">
+                              <h3 className="font-semibold text-rich-green mb-2 line-clamp-1">
+                                {listing.title}
+                              </h3>
+                              <div className="flex items-center text-rich-green/70 text-sm mb-2">
+                                <MapPin className="w-4 h-4 mr-1" />
+                                <span>{listing.city}</span>
+                              </div>
+                              <div className="flex items-center text-rich-green font-semibold mb-4">
+                                <DollarSign className="w-4 h-4 mr-1" />
+                                <span>Rs. {listing.rent?.toLocaleString?.() || listing.rent}/month</span>
+                              </div>
+                              
+                              {/* Status Message */}
+                              {listing.status === 'REJECTED' && listing.rejectionReason && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                  <p className="text-sm text-red-600">
+                                    <strong>Rejection Reason:</strong> {listing.rejectionReason}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {listing.status === 'PENDING' && (
+                                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                  <p className="text-sm text-yellow-600">
+                                    Your listing is under review. We&apos;ll notify you once it&apos;s approved.
+                                  </p>
+                                </div>
+                              )}
+                              
+                              <div className="flex space-x-2">
+                                <Link 
+                                  href={`/listing/${listing.id}`}
+                                  className="flex-1 text-center px-3 py-2 text-sm font-medium text-rich-green border border-rich-green rounded-lg hover:bg-rich-green hover:text-white transition-all duration-200"
+                                >
+                                  <Eye className="w-4 h-4 inline mr-1" />
+                                  View
+                                </Link>
+                                {listing.status !== 'REJECTED' && (
+                                  <Link 
+                                    href={`/listing/${listing.id}/edit`}
+                                    className="flex-1 text-center px-3 py-2 text-sm font-medium text-rich-green/70 border border-soft-sage rounded-lg hover:bg-soft-sage/20 transition-all duration-200"
+                                  >
+                                    <Edit className="w-4 h-4 inline mr-1" />
+                                    Edit
+                                  </Link>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -353,22 +480,35 @@ export default async function DashboardPage() {
               <div className="card-sage p-6">
                 <h3 className="text-lg font-semibold text-rich-green mb-4 flex items-center">
                   <TrendingUp className="w-5 h-5 mr-2" />
-                  Quick Stats
+                  Listing Status
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-rich-green/70">Total Listings</span>
-                    <span className="text-sm font-semibold text-rich-green">{myListings.length}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-rich-green/70">Account Status</span>
-                    <span className={`text-sm font-semibold ${profile?.isVerified ? 'text-rich-green' : 'text-yellow-600'}`}>
-                      {profile?.isVerified ? 'Verified' : 'Unverified'}
+                    <span className="text-sm text-rich-green/70 flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                      Approved
                     </span>
+                    <span className="text-sm font-semibold text-green-600">{statusCounts.APPROVED || 0}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-rich-green/70">Member Since</span>
-                    <span className="text-sm font-semibold text-rich-green">2025</span>
+                    <span className="text-sm text-rich-green/70 flex items-center">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                      Pending
+                    </span>
+                    <span className="text-sm font-semibold text-yellow-600">{statusCounts.PENDING || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-rich-green/70 flex items-center">
+                      <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                      Rejected
+                    </span>
+                    <span className="text-sm font-semibold text-red-600">{statusCounts.REJECTED || 0}</span>
+                  </div>
+                  <div className="border-t border-soft-sage/20 pt-2 mt-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-rich-green">Total</span>
+                      <span className="text-sm font-bold text-rich-green">{allMyListings.length}</span>
+                    </div>
                   </div>
                 </div>
               </div>

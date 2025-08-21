@@ -8,8 +8,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Simplified query without complex includes
+    // Simplified query without complex includes - only show approved listings
     const listings = await prisma.listing.findMany({
+      where: {
+        status: "APPROVED"
+      },
       take: 10, // Limit results to avoid timeout
       orderBy: { createdAt: "desc" },
       select: {

@@ -27,6 +27,9 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
   // Lazy-load Prisma
   const { prisma } = await import("@/libs/prisma")
   
+  // Check if this is the user's own profile
+  const isOwnProfile = session?.user?.id === id
+  
   const user = await prisma.user.findUnique({
     where: { id },
     select: {
@@ -40,6 +43,9 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
       university: true,
       createdAt: true,
       listings: {
+        where: isOwnProfile 
+          ? {} // Show all listings for own profile
+          : { status: 'APPROVED' }, // Only show approved listings to other users
         select: {
           id: true,
           title: true,
@@ -58,7 +64,6 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
 
   if (!user) notFound()
 
-  const isOwnProfile = session?.user?.email === user.email
   const memberSince = new Date(user.createdAt).getFullYear()
   const activeListings = user.listings.length
 
@@ -111,7 +116,9 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="text-center p-4 bg-gradient-to-br from-mint-cream/50 to-soft-sage/30 rounded-xl">
                   <div className="text-2xl font-bold text-rich-green">{activeListings}</div>
-                  <div className="text-sm text-rich-green/70">Active Listings</div>
+                  <div className="text-sm text-rich-green/70">
+                    {isOwnProfile ? 'Total Listings' : 'Active Listings'}
+                  </div>
                 </div>
                 <div className="text-center p-4 bg-gradient-to-br from-mint-cream/50 to-soft-sage/30 rounded-xl">
                   <div className="text-2xl font-bold text-rich-green">{memberSince}</div>
@@ -207,7 +214,7 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
             <div className="bg-white/95 backdrop-blur-sm border border-rich-green/20 rounded-2xl shadow-lg p-6">
               <h2 className="text-2xl font-bold text-rich-green mb-6 flex items-center">
                 <Home className="w-6 h-6 mr-3" />
-                {isOwnProfile ? 'My Listings' : 'User Listings'} ({activeListings})
+                {isOwnProfile ? `My Listings (${activeListings})` : `Active Listings (${activeListings})`}
               </h2>
 
               {user.listings.length === 0 ? (

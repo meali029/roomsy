@@ -13,8 +13,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Step 2: Test if Listing table exists and count records
     const listingCount = await prisma.listing.count()
     
-    // Step 3: Fetch a small sample of listings
+    // Step 3: Fetch a small sample of approved listings
     const sampleListings = await prisma.listing.findMany({
+      where: {
+        status: "APPROVED"
+      },
       take: 3,
       select: {
         id: true,
@@ -26,8 +29,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       orderBy: { createdAt: "desc" },
     })
 
-    // Step 4: Test the full query that the main API uses
+    // Step 4: Test the full query that the main API uses - only approved listings
     const fullListings = await prisma.listing.findMany({
+      where: {
+        status: "APPROVED"
+      },
       take: 2,
       orderBy: { createdAt: "desc" },
       include: {

@@ -25,7 +25,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ message: "cnicBase64 is required" })
       }
 
-      console.log("Starting CNIC upload for user:", session.user.id)
 
       // Upload CNIC image to Cloudinary
       const uploadResult = await uploadImageToCloudinary(
@@ -42,7 +41,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
       }
 
-      console.log("Image uploaded successfully to Cloudinary:", uploadResult.url)
 
       // Now TypeScript knows uploadResult is the success type
       const imageUrl = uploadResult.url
@@ -63,7 +61,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       })
 
-      console.log("Verification request created/updated:", request.id)
 
       return res.status(201).json({ request })
     }
