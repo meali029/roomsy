@@ -78,7 +78,7 @@ export default function Navbar() {
       { label: "Home", href: "/" },
       { label: "Browse", href: "/listing" },
       { label: "Dashboard", href: "/dashboard" },
-      { label: "Messages", href: "/" },
+      { label: "Messages", href: "#" },
       { label: "Support", href: "/support" },
     ]
   }
@@ -242,15 +242,23 @@ export default function Navbar() {
             
             {/* Mobile Auth Actions */}
             {session?.user ? (
-              <div className="pt-4 border-t border-white/20 space-y-2">
+              <div className="pt-4 border-t border-white/20 space-y-3">
                 {!isAdmin && (
                   <>
                     <Link
                       href="/listing/create"
                       onClick={() => setIsMenuOpen(false)}
-                      className="block px-4 py-3 text-sm font-medium text-white bg-rich-green rounded-xl"
+                      className="relative block px-6 py-4 text-sm font-bold text-black bg-mint-cream rounded-2xl
+                               shadow-soft border border-mint-cream/70 
+                               hover:bg-mint-cream hover:shadow-lg hover:scale-[1.02] hover:-translate-y-0.5
+                               active:scale-[0.98] transition-all duration-300 ease-out group overflow-hidden"
                     >
-                      + Create Listing
+                      <div className="absolute inset-0 bg-gradient-to-r from-soft-sage/20 to-mint-cream/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative flex items-center justify-center gap-2">
+                        <span className="text-lg">+</span>
+                        <span>Create Listing</span>
+                        <div className="ml-auto w-2 h-2 bg-rich-green rounded-full animate-pulse"></div>
+                      </div>
                     </Link>
                     <Link
                       href="/dashboard/profile"

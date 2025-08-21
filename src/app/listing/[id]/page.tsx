@@ -157,9 +157,7 @@ export default function ListingDetailPage() {
   // Check if current user is the owner of this listing
   const isOwner = session?.user?.email === listing.user?.email
   
-  console.log("Session user:", session?.user?.email)
-  console.log("Listing owner:", listing.user?.email)
-  console.log("Is owner:", isOwner)
+ 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-soft-sage/5 via-mint-cream/10 to-white">
