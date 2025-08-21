@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, Calendar, Users, Shield, Heart, Clock, CheckCircle, XCircle } from "lucide-react"
+import { MapPin, Calendar, Users, Shield, Heart, Clock, CheckCircle, XCircle, MessageCircle } from "lucide-react"
 
 interface ListingCardProps {
   id: string
@@ -14,6 +14,7 @@ interface ListingCardProps {
   imageUrl?: string
   status?: "PENDING" | "APPROVED" | "REJECTED"
   showStatus?: boolean // New prop to control status display
+  ownerId?: string // Add owner ID for contact functionality
 }
 
 export default function ListingCard({
@@ -26,6 +27,7 @@ export default function ListingCard({
   imageUrl,
   status = "APPROVED",
   showStatus = false,
+  ownerId,
 }: ListingCardProps) {
   const getStatusBadge = () => {
     if (!showStatus) return null
@@ -152,10 +154,21 @@ export default function ListingCard({
           <div className="pt-4 border-t border-rich-green/10">
             <div className="flex items-center justify-between">
               <span className="text-sm text-rich-green/70">View Details</span>
-              <div className="w-8 h-8 bg-rich-green/10 rounded-full flex items-center justify-center group-hover:bg-rich-green group-hover:text-white transition-all">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                </svg>
+              <div className="flex items-center space-x-2">
+                {ownerId && (
+                  <Link
+                    href={`/chat?partner=${ownerId}&listing=${id}`}
+                    className="p-2 bg-rich-green/10 rounded-full text-rich-green hover:bg-rich-green hover:text-white transition-all"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                  </Link>
+                )}
+                <div className="w-8 h-8 bg-rich-green/10 rounded-full flex items-center justify-center group-hover:bg-rich-green group-hover:text-white transition-all">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>

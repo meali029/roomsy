@@ -19,6 +19,7 @@ interface Listing {
   availableFrom: string
   imageUrls: string[]
   user: {
+    id: string
     name: string
     city: string
     gender: string
@@ -459,6 +460,7 @@ export default function ListingsPage() {
                 genderPreference={listing.genderPreference}
                 availableFrom={listing.availableFrom}
                 imageUrl={listing.imageUrls[0]}
+                ownerId={listing.user?.id}
               />
             ))}
           </div>

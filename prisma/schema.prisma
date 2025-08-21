@@ -48,17 +48,32 @@ model Listing {
   updatedAt        DateTime      @updatedAt
   user             User          @relation(fields: [userId], references: [id])
   reviews          Review[]
+  messages         Message[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Message {
-  id                            String   @id
+  id                            String      @id @default(cuid())
   senderId                      String
   receiverId                    String
   content                       String
-  createdAt                     DateTime @default(now())
-  User_Message_receiverIdToUser User     @relation("Message_receiverIdToUser", fields: [receiverId], references: [id])
-  User_Message_senderIdToUser   User     @relation("Message_senderIdToUser", fields: [senderId], references: [id])
+  isRead                        Boolean     @default(false)
+  messageType                   MessageType @default(TEXT)
+  listingId                     String?
+  createdAt                     DateTime    @default(now())
+  updatedAt                     DateTime    @updatedAt
+  User_Message_receiverIdToUser User        @relation("Message_receiverIdToUser", fields: [receiverId], references: [id])
+  User_Message_senderIdToUser   User        @relation("Message_senderIdToUser", fields: [senderId], references: [id])
+  listing                       Listing?    @relation(fields: [listingId], references: [id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Conversation {
+  id            String   @id @default(cuid())
+  participants  String[]
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
@@ -146,4 +161,10 @@ enum ListingStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  LISTING_INQUIRY
 }

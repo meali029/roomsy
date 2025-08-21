@@ -391,10 +391,13 @@ export default function ListingDetailPage() {
                   </Link>
                 ) : (
                   <>
-                    <button className="flex items-center justify-center space-x-2 bg-rich-green text-white px-4 md:px-6 py-3 rounded-xl font-medium hover:bg-rich-green/90 transition-colors w-full text-sm md:text-base">
+                    <Link 
+                      href={`/chat?partner=${listing.user?.id}&listing=${id}`}
+                      className="flex items-center justify-center space-x-2 bg-rich-green text-white px-4 md:px-6 py-3 rounded-xl font-medium hover:bg-rich-green/90 transition-colors w-full text-sm md:text-base"
+                    >
                       <MessageCircle className="w-4 h-4" />
                       <span>Contact Owner</span>
-                    </button>
+                    </Link>
                     <Link 
                       href={`/profile/${listing.user?.id}`}
                       className="flex items-center justify-center space-x-2 bg-white border-2 border-rich-green text-rich-green px-4 md:px-6 py-3 rounded-xl font-medium hover:bg-rich-green/5 transition-colors w-full text-sm md:text-base"
