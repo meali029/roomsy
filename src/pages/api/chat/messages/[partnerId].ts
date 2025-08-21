@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         content: true,
         isRead: true,
         messageType: true,
-        listingId: true, // Ensure this is present
+        listingId: true,
         createdAt: true,
         updatedAt: true,
         User_Message_senderIdToUser: {
@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             profilePicture: true,
           }
         },
-        receiver: {
+        User_Message_receiverIdToUser: {
           select: {
             id: true,
             name: true,
@@ -84,8 +84,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     })
 
-    // Format messages
-    const formattedMessages = messages.map(message => ({
+    // Format messages using the sorted order
+    const formattedMessages = sortedMessages.map(message => ({
       id: message.id,
       senderId: message.senderId,
       receiverId: message.receiverId,
@@ -96,7 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       createdAt: message.createdAt,
       updatedAt: message.updatedAt,
       sender: message.User_Message_senderIdToUser,
-      receiver: message.receiver,
+      receiver: message.User_Message_receiverIdToUser,
       listing: message.listing,
     }))
 
