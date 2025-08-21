@@ -60,7 +60,8 @@ export default function Navbar() {
       return [
         { label: "Home", href: "/" },
         { label: "Browse Listings", href: "/listing" },
-        { label: "How It Works", href: "/#how-it-works" },
+        { label: "How It Works", href: "/how-it-works" },
+        { label: "Success Stories", href: "/success-stories" },
         { label: "Support", href: "/support" },
         { label: "FAQ", href: "/faq" },
       ]

@@ -100,9 +100,10 @@ export default function Footer() {
                 {[
                   { label: "Browse Listings", href: "/listing" },
                   { label: "Post Listing", href: "/listing/create" },
+                  { label: "How It Works", href: "/how-it-works" },
                   { label: "Dashboard", href: "/dashboard" },
                   { label: "Find Roommates", href: "/listing" },
-                  { label: "Success Stories", href: "/stories" }
+                  { label: "Success Stories", href: "/success-stories" }
                 ].map((link, index) => (
                   <li key={index}>
                     <Link 
