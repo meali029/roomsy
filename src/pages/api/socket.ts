@@ -34,6 +34,7 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
     })
 
     const onlineUsers = new Map<string, string>() // userId -> socketId
+    const socketToUser = new Map<string, string>() // socketId -> userId
 
     io.on('connection', (socket) => {
       console.log('User connected:', socket.id)
@@ -42,6 +43,7 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
       socket.on('join-room', (userId: string) => {
         socket.join(userId)
         onlineUsers.set(userId, socket.id)
+        socketToUser.set(socket.id, userId)
         socket.broadcast.emit('user-online', userId)
         
         // Send current online users to the newly connected user
@@ -53,6 +55,7 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
       socket.on('leave-room', (userId: string) => {
         socket.leave(userId)
         onlineUsers.delete(userId)
+        socketToUser.delete(socket.id)
         socket.broadcast.emit('user-offline', userId)
       })
 
@@ -64,6 +67,7 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
         messageType?: 'TEXT' | 'IMAGE' | 'LISTING_INQUIRY'
         listingId?: string
       }) => {
+        console.log('Received send-message event:', data)
         try {
           // Save message to database
           const message = await prisma.message.create({
@@ -99,6 +103,8 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
             }
           })
 
+          console.log('Message saved to database:', message.id)
+
           // Format message for client
           const formattedMessage = {
             id: message.id,
@@ -115,6 +121,7 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
             listing: message.listing,
           }
 
+          console.log('Sending message to rooms:', data.senderId, data.receiverId)
           // Send to both sender and receiver
           io.to(data.senderId).emit('receive-message', formattedMessage)
           io.to(data.receiverId).emit('receive-message', formattedMessage)
@@ -139,22 +146,24 @@ const SocketHandler = (req: NextApiRequest, res: NextApiResponseWithSocket) => {
 
       // Typing indicator
       socket.on('typing', (data: { receiverId: string; isTyping: boolean }) => {
-        socket.to(data.receiverId).emit('user-typing', {
-          senderId: socket.id,
-          isTyping: data.isTyping
-        })
+        const senderId = socketToUser.get(socket.id)
+        if (senderId) {
+          socket.to(data.receiverId).emit('user-typing', {
+            senderId: senderId,
+            isTyping: data.isTyping
+          })
+        }
       })
 
       // Handle disconnect
       socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id)
         // Find and remove user from online users
-        for (const [userId, socketId] of onlineUsers.entries()) {
-          if (socketId === socket.id) {
-            onlineUsers.delete(userId)
-            socket.broadcast.emit('user-offline', userId)
-            break
-          }
+        const userId = socketToUser.get(socket.id)
+        if (userId) {
+          onlineUsers.delete(userId)
+          socketToUser.delete(socket.id)
+          socket.broadcast.emit('user-offline', userId)
         }
       })
     })

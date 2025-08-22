@@ -41,7 +41,23 @@ export default function ChatInterface({
   const user = session?.user as { id: string; name: string; email: string; role: "USER" | "ADMIN" } | undefined
 
   const handleReceiveMessage = useCallback((message: ChatMessage) => {
-    setMessages(prev => [...prev, message])
+    console.log('Received message:', message)
+    
+    // Only add the message if it's for the current conversation
+    if (selectedConversation && 
+        (message.senderId === selectedConversation.otherUser.id || 
+         message.receiverId === selectedConversation.otherUser.id)) {
+      setMessages(prev => {
+        // Check if message already exists to prevent duplicates
+        const exists = prev.some(msg => msg.id === message.id)
+        if (exists) {
+          console.log('Message already exists, skipping')
+          return prev
+        }
+        console.log('Adding new message to conversation')
+        return [...prev, message]
+      })
+    }
     
     // Update conversations list
     setConversations(prev => {
@@ -62,7 +78,7 @@ export default function ChatInterface({
         new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
       )
     })
-  }, [user?.id])
+  }, [user?.id, selectedConversation])
 
   const selectConversation = useCallback((conversation: ChatConversation) => {
     setSelectedConversation(conversation)
@@ -117,9 +133,19 @@ export default function ChatInterface({
 
   useEffect(() => {
     if (user?.id) {
+      console.log('Connecting to socket for user:', user.id)
       // Connect to socket
       socketClient.connect(user.id)
       fetchConversations()
+      
+      // Check socket connection status
+      setTimeout(() => {
+        const socketStatus = socketClient.isConnected()
+        console.log('Socket connection status:', socketStatus)
+        if (!socketStatus) {
+          console.warn('Socket not connected after timeout')
+        }
+      }, 2000)
     }
   }, [user?.id])
 
@@ -137,12 +163,16 @@ export default function ChatInterface({
 
   useEffect(() => {
     if (socket && user?.id) {
+      console.log('Setting up socket event listeners')
+      
       // Socket event listeners
       const handleUserOnline = (userId: string) => {
+        console.log('User came online:', userId)
         setOnlineUsers(prev => new Set([...prev, userId]))
       }
 
       const handleUserOffline = (userId: string) => {
+        console.log('User went offline:', userId)
         setOnlineUsers(prev => {
           const updated = new Set(prev)
           updated.delete(userId)
@@ -151,10 +181,12 @@ export default function ChatInterface({
       }
 
       const handleOnlineUsers = (userIds: string[]) => {
+        console.log('Online users updated:', userIds)
         setOnlineUsers(new Set(userIds))
       }
 
       const handleUserTyping = ({ senderId, isTyping }: { senderId: string; isTyping: boolean }) => {
+        console.log('User typing event:', { senderId, isTyping })
         setTypingUsers(prev => {
           const updated = new Set(prev)
           if (isTyping) {
@@ -166,18 +198,26 @@ export default function ChatInterface({
         })
       }
 
+      const handleSocketError = (error: Error | string) => {
+        console.error('Socket error:', error)
+      }
+
+      // Add event listeners
       socket.on('receive-message', handleReceiveMessage)
       socket.on('user-online', handleUserOnline)
       socket.on('user-offline', handleUserOffline)
       socket.on('online-users', handleOnlineUsers)
       socket.on('user-typing', handleUserTyping)
+      socket.on('error', handleSocketError)
 
       return () => {
+        console.log('Cleaning up socket event listeners')
         socket.off('receive-message', handleReceiveMessage)
         socket.off('user-online', handleUserOnline)
         socket.off('user-offline', handleUserOffline)
         socket.off('online-users', handleOnlineUsers)
         socket.off('user-typing', handleUserTyping)
+        socket.off('error', handleSocketError)
       }
     }
   }, [socket, user?.id, handleReceiveMessage])
@@ -265,7 +305,10 @@ export default function ChatInterface({
   }, [hasMoreMessages, loadingMore, selectedConversation, messages.length])
 
   const handleSendMessage = async (content: string) => {
-    if (!selectedConversation || !user?.id) return
+    if (!selectedConversation || !user?.id) {
+      console.error('Cannot send message: missing conversation or user')
+      return
+    }
 
     const messageData = {
       senderId: user.id,
@@ -275,12 +318,37 @@ export default function ChatInterface({
       listingId
     }
 
+    console.log('Sending message:', messageData)
+
     // Enable auto-scroll since user is sending a message
     setShouldAutoScroll(true)
 
     // Send via socket
     if (socket) {
+      console.log('Socket is available, emitting message')
       socket.emit('send-message', messageData)
+    } else {
+      console.error('Socket not available, falling back to API')
+      // Fallback to API if socket is not available
+      try {
+        const response = await fetch('/api/chat/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(messageData),
+        })
+
+        if (response.ok) {
+          const newMessage = await response.json()
+          console.log('Message sent via API:', newMessage)
+          setMessages(prev => [...prev, newMessage])
+        } else {
+          console.error('Failed to send message via API:', response.status)
+        }
+      } catch (error) {
+        console.error('Error sending message via API:', error)
+      }
     }
   }
 

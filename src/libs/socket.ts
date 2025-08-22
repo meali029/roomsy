@@ -15,9 +15,12 @@ class SocketClient {
 
   connect(userId: string): Socket {
     if (!this.socket || !this.socket.connected) {
+      console.log('Creating new socket connection for user:', userId)
       this.socket = io(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', {
         path: '/api/socket',
         transports: ['polling'],
+        timeout: 20000,
+        forceNew: true,
       })
 
       this.socket.on('connect', () => {
@@ -32,6 +35,17 @@ class SocketClient {
       this.socket.on('connect_error', (error) => {
         console.error('Socket connection error:', error)
       })
+
+      this.socket.on('reconnect', () => {
+        console.log('Reconnected to socket server')
+        this.socket?.emit('join-room', userId)
+      })
+
+      this.socket.on('reconnect_error', (error) => {
+        console.error('Socket reconnection error:', error)
+      })
+    } else {
+      console.log('Using existing socket connection')
     }
 
     return this.socket
