@@ -78,6 +78,7 @@ export default function Navbar() {
     return [
       { label: "Home", href: "/" },
       { label: "Browse", href: "/listing" },
+      { label: "Location Finder", href: "/location-finder" },
       { label: "Dashboard", href: "/dashboard" },
       { label: "Messages", href: "/chat" },
       { label: "Support", href: "/support" },
@@ -109,12 +110,17 @@ export default function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-all duration-200 hover:scale-105 ${
+              className={`text-sm font-medium transition-all duration-200 hover:scale-105 relative ${
                 pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href))
                   ? "text-rich-green font-semibold" 
                   : "text-black hover:text-rich-green"
-              }`}
+              } ${link.label === "Location Finder" ? "flex items-center gap-2" : ""}`}
             >
+              {link.label === "Location Finder" && (
+                <span className="text-xs bg-rich-green text-white px-2 py-1 rounded-full font-bold">
+                  AI
+                </span>
+              )}
               {link.label}
             </Link>
           ))}
@@ -235,8 +241,13 @@ export default function Navbar() {
                   pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href))
                     ? "text-white bg-rich-green font-semibold" 
                     : "text-black hover:text-rich-green hover:bg-mint-cream/50"
-                }`}
+                } ${link.label === "Location Finder" ? "flex items-center gap-2" : ""}`}
               >
+                {link.label === "Location Finder" && (
+                  <span className="text-xs bg-white text-rich-green px-2 py-1 rounded-full font-bold">
+                    AI
+                  </span>
+                )}
                 {link.label}
               </Link>
             ))}

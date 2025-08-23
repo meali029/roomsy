@@ -11,7 +11,8 @@ import {
   MoreHorizontal,
   Plus,
   Settings,
-  LogOut
+  LogOut,
+  MapPin
 } from "lucide-react"
 import { useState } from "react"
 
@@ -99,9 +100,14 @@ export default function MobileBottomNav() {
 
   const moreMenuItems = [
     { 
+      icon: MapPin, 
+      label: "Location Finder", 
+      href: "/location-finder",
+    },
+    { 
       icon: MessageCircle, 
       label: "Messages", 
-      href: "/",
+      href: "/chat",
     },
     { 
       icon: Settings, 
@@ -156,7 +162,14 @@ export default function MobileBottomNav() {
                     <div className="p-2 rounded-xl bg-black/5 group-hover:bg-black/10 transition-colors duration-200">
                       <item.icon className="w-5 h-5" />
                     </div>
-                    <span className="font-semibold text-sm">{item.label}</span>
+                    <span className="font-semibold text-sm flex items-center gap-2">
+                      {item.label}
+                      {item.label === "Location Finder" && (
+                        <span className="text-xs bg-rich-green text-white px-2 py-1 rounded-full font-bold">
+                          AI
+                        </span>
+                      )}
+                    </span>
                   </Link>
                 )}
               </div>
