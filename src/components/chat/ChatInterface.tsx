@@ -503,7 +503,7 @@ export default function ChatInterface({
 
                 {/* Chat Actions */}
                 <div className="flex items-center space-x-2">
-                  <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg">
+                  <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 hover:text-rich-green hover:bg-mint-cream/50 rounded-lg">
                     <Phone className="w-4 h-4" />
                   </button>
                   <button className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg">

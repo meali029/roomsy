@@ -95,29 +95,36 @@ export default function Navbar() {
           : 'bg-white/80 backdrop-blur-sm'
       }`}
     >
-      <nav className="max-w-7xl mx-auto container-spacing py-4 flex items-center justify-between">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
         {/* Logo */}
         <Link 
           href={isAdmin ? "/admin" : "/"} 
-          className="text-2xl md:text-3xl font-bold text-darkest-green tracking-tight hover:scale-105 transition-transform duration-200"
+          className="text-xl sm:text-2xl md:text-3xl font-bold text-darkest-green tracking-tight hover:scale-105 transition-all duration-300 hover:text-opacity-80 active:scale-95 mr-8 lg:mr-12 xl:mr-16"
         >
           {isAdmin ? "Roomsy Admin" : "Roomsy.pk"}
         </Link>
 
         {/* Desktop Nav Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-4 xl:gap-8 flex-1 justify-center">
           {navLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-all duration-200 hover:scale-105 relative ${
+              className={`text-sm font-medium transition-all duration-300 relative group px-3 py-2 rounded-lg ${
                 pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href))
-                  ? "text-rich-green font-semibold" 
-                  : "text-black hover:text-rich-green"
+                  ? "text-rich-green font-semibold bg-rich-green/10" 
+                  : "text-black hover:text-rich-green hover:bg-rich-green/5 active:scale-95"
               } ${link.label === "Location Finder" ? "flex items-center gap-2" : ""}`}
             >
+              {/* Hover underline effect */}
+              <span className={`absolute bottom-0 left-1/2 w-0 h-0.5 bg-rich-green transition-all duration-300 transform -translate-x-1/2 ${
+                pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href))
+                  ? "w-full" 
+                  : "group-hover:w-3/4"
+              }`}></span>
+              
               {link.label === "Location Finder" && (
-                <span className="text-xs bg-rich-green text-white px-2 py-1 rounded-full font-bold">
+                <span className="text-xs bg-rich-green text-white px-2 py-1 rounded-full font-bold animate-pulse">
                   AI
                 </span>
               )}
@@ -127,55 +134,57 @@ export default function Navbar() {
         </div>
 
         {/* Desktop Auth Actions */}
-        <div className="hidden md:flex gap-3 items-center">
+        <div className="hidden lg:flex gap-2 xl:gap-3 items-center">
           {session?.user ? (
             <>
               {/* Show Create Listing only for regular users */}
               {!isAdmin && (
                 <Link
                   href="/listing/create"
-                  className="btn-rich text-sm py-3 px-6"
+                  className="btn-rich text-sm py-2.5 px-4 xl:py-3 xl:px-6 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
                 >
-                  + Create Listing
+                  <span className="hidden xl:inline">+ Create Listing</span>
+                  <span className="xl:hidden">+ List</span>
                 </Link>
               )}
               
               {/* User Profile Dropdown */}
               <div className="relative group">
-                <button className={`flex items-center gap-2 text-sm px-4 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105 ${
+                <button className={`flex items-center gap-2 text-sm px-3 xl:px-4 py-2.5 xl:py-3 rounded-xl font-medium transition-all duration-300 hover:scale-105 active:scale-95 ${
                   isAdmin 
-                    ? "bg-darkest-green/10 text-darkest-green hover:bg-darkest-green/20 border border-darkest-green/20" 
-                    : "bg-soft-sage/20 text-rich-green hover:bg-soft-sage/30 border border-soft-sage/30"
-                } backdrop-blur-sm`}>
-                  {isAdmin ? "👑 " : "👤 "}{session.user.name?.split(" ")[0]}
-                  <ChevronDown className="w-4 h-4" />
+                    ? "bg-darkest-green/10 text-darkest-green hover:bg-darkest-green/20 border border-darkest-green/20 hover:border-darkest-green/40" 
+                    : "bg-soft-sage/20 text-rich-green hover:bg-soft-sage/30 border border-soft-sage/30 hover:border-soft-sage/50"
+                } backdrop-blur-sm hover:shadow-md`}>
+                  {isAdmin ? "👑 " : "👤 "}
+                  <span className="hidden sm:inline">{session.user.name?.split(" ")[0]}</span>
+                  <ChevronDown className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" />
                 </button>
                 
                 {/* Dropdown Menu */}
-                <div className="absolute right-0 top-full mt-2 w-56 glass-mint opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 rounded-xl">
+                <div className="absolute right-0 top-full mt-2 w-48 xl:w-56 glass-mint opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 rounded-xl shadow-lg hover:shadow-xl">
                   <div className="p-2">
-                    <div className="px-4 py-3 border-b border-soft-sage/20">
-                      <p className="text-sm font-semibold text-black">{session.user.name}</p>
-                      <p className="text-xs text-black/70">{session.user.email}</p>
+                    <div className="px-3 xl:px-4 py-3 border-b border-soft-sage/20">
+                      <p className="text-sm font-semibold text-black truncate">{session.user.name}</p>
+                      <p className="text-xs text-black/70 truncate">{session.user.email}</p>
                     </div>
                     
                     {!isAdmin && (
                       <>
                         <Link
                           href="/dashboard/profile"
-                          className="block px-4 py-3 text-sm text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-200"
+                          className="block px-3 xl:px-4 py-3 text-sm text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95"
                         >
                           My Profile
                         </Link>
                         <Link
                           href="/dashboard"
-                          className="block px-4 py-3 text-sm text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-200"
+                          className="block px-3 xl:px-4 py-3 text-sm text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95"
                         >
                           Dashboard
                         </Link>
                         <Link
                           href="/listing/create"
-                          className="block px-4 py-3 text-sm text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-200"
+                          className="block px-3 xl:px-4 py-3 text-sm text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95"
                         >
                           Create Listing
                         </Link>
@@ -185,7 +194,7 @@ export default function Navbar() {
                     {isAdmin && (
                       <Link
                         href="/admin"
-                        className="block px-4 py-3 text-sm text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-200"
+                        className="block px-3 xl:px-4 py-3 text-sm text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95"
                       >
                         Admin Dashboard
                       </Link>
@@ -193,7 +202,7 @@ export default function Navbar() {
                     
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 text-sm text-darkest-green hover:bg-darkest-green/10 rounded-xl transition-all duration-200"
+                      className="w-full text-left px-3 xl:px-4 py-3 text-sm text-darkest-green hover:bg-darkest-green/10 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95"
                     >
                       Sign Out
                     </button>
@@ -205,15 +214,16 @@ export default function Navbar() {
             <>
               <Link 
                 href="/login" 
-                className="text-sm text-black hover:text-rich-green font-medium transition-colors px-4 py-2"
+                className="text-sm text-black hover:text-rich-green font-medium transition-all duration-300 px-3 xl:px-4 py-2 rounded-lg hover:bg-rich-green/5 active:scale-95"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="btn-rich text-sm py-3 px-6"
+                className="btn-rich text-sm py-2.5 px-4 xl:py-3 xl:px-6 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
               >
-                Sign Up Free
+                <span className="hidden sm:inline">Sign Up Free</span>
+                <span className="sm:hidden">Sign Up</span>
               </Link>
             </>
           )}
@@ -221,7 +231,7 @@ export default function Navbar() {
 
         {/* Mobile menu button */}
         <button 
-          className="md:hidden p-2 text-black hover:text-rich-green transition-colors"
+          className="lg:hidden p-2 text-black hover:text-rich-green transition-all duration-300 hover:bg-rich-green/10 rounded-lg active:scale-95"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -230,21 +240,21 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden glass-sage border-t border-white/20">
-          <div className="container-spacing py-4 space-y-2">
+        <div className="lg:hidden glass-sage border-t border-white/20 animate-slide-down">
+          <div className="px-4 sm:px-6 py-4 space-y-2 max-h-[70vh] overflow-y-auto">
             {navLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsMenuOpen(false)}
-                className={`block px-4 py-3 text-sm font-medium transition-all duration-200 rounded-xl ${
+                className={`block px-4 py-3 text-sm font-medium transition-all duration-300 rounded-xl hover:scale-[1.02] active:scale-95 ${
                   pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href))
-                    ? "text-white bg-rich-green font-semibold" 
+                    ? "text-white bg-rich-green font-semibold shadow-md" 
                     : "text-black hover:text-rich-green hover:bg-mint-cream/50"
                 } ${link.label === "Location Finder" ? "flex items-center gap-2" : ""}`}
               >
                 {link.label === "Location Finder" && (
-                  <span className="text-xs bg-white text-rich-green px-2 py-1 rounded-full font-bold">
+                  <span className="text-xs bg-white text-rich-green px-2 py-1 rounded-full font-bold animate-pulse">
                     AI
                   </span>
                 )}
@@ -275,7 +285,7 @@ export default function Navbar() {
                     <Link
                       href="/dashboard/profile"
                       onClick={() => setIsMenuOpen(false)}
-                      className="block px-4 py-3 text-sm font-medium text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-200"
+                      className="block px-4 py-3 text-sm font-medium text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95"
                     >
                       My Profile
                     </Link>
@@ -286,7 +296,7 @@ export default function Navbar() {
                     setIsMenuOpen(false)
                     handleLogout()
                   }}
-                  className="w-full text-left px-4 py-3 text-sm font-medium text-darkest-green hover:bg-darkest-green/10 rounded-xl transition-all duration-200"
+                  className="w-full text-left px-4 py-3 text-sm font-medium text-darkest-green hover:bg-darkest-green/10 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95"
                 >
                   Sign Out
                 </button>
@@ -296,14 +306,14 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-200"
+                  className="block px-4 py-3 text-sm font-medium text-black hover:bg-mint-cream/50 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95"
                 >
                   Login
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-white bg-rich-green rounded-xl"
+                  className="block px-4 py-3 text-sm font-medium text-white bg-rich-green rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95"
                 >
                   Sign Up Free
                 </Link>
